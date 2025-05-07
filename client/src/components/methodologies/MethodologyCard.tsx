@@ -24,7 +24,7 @@ export default function MethodologyCard({ methodology }: MethodologyCardProps) {
     <Card className="h-full flex flex-col">
       <CardContent className="p-0 flex-grow">
         <div className="p-4 border-b">
-          <Badge className={getCategoryColor(methodology.category)} className="mb-2">
+          <Badge className={`${getCategoryColor(methodology.category)} mb-2`}>
             {methodology.category}
           </Badge>
           <h3 className="font-medium text-neutral-900">{methodology.name}</h3>
