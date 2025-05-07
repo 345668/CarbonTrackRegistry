@@ -23,28 +23,32 @@ export default function DashboardStats() {
       value: formatNumber(stats.totalProjects),
       percentChange: 12,
       icon: "eco",
-      color: "bg-primary-light text-primary",
+      color: "bg-primary/10 text-primary", 
+      borderColor: "border-primary/20",
     },
     {
       title: "Carbon Credits (tCO₂e)",
       value: formatNumber(stats.totalCredits),
       percentChange: 8.2,
       icon: "account_balance_wallet",
-      color: "bg-secondary-light text-secondary",
+      color: "bg-blue-500/10 text-blue-600",
+      borderColor: "border-blue-500/20",
     },
     {
       title: "Verified Projects",
       value: formatNumber(stats.verifiedProjects),
       percentChange: 4,
       icon: "verified",
-      color: "bg-accent-light text-accent-dark",
+      color: "bg-green-500/10 text-green-600",
+      borderColor: "border-green-500/20",
     },
     {
       title: "Pending Verification",
       value: formatNumber(stats.pendingVerification),
       percentChange: -3,
       icon: "pending_actions",
-      color: "bg-neutral-100 text-neutral-700",
+      color: "bg-amber-500/10 text-amber-600",
+      borderColor: "border-amber-500/20",
     },
   ];
 
@@ -57,11 +61,11 @@ export default function DashboardStats() {
   );
 }
 
-function StatCardComponent({ title, value, percentChange, icon, color }: StatCard) {
+function StatCardComponent({ title, value, percentChange, icon, color, borderColor }: StatCard) {
   const isPositive = percentChange ? percentChange > 0 : false;
   
   return (
-    <Card>
+    <Card className={`shadow-sm ${borderColor} border`}>
       <CardContent className="px-4 py-5 sm:p-6">
         <div className="flex items-center">
           <div className={`flex-shrink-0 rounded-md p-3 ${color}`}>
@@ -73,7 +77,7 @@ function StatCardComponent({ title, value, percentChange, icon, color }: StatCar
               <dd className="flex items-baseline">
                 <div className="text-2xl font-semibold text-neutral-900">{value}</div>
                 {percentChange && (
-                  <div className={`ml-2 flex items-baseline text-sm font-semibold ${isPositive ? 'text-success' : 'text-error'}`}>
+                  <div className={`ml-2 flex items-baseline text-sm font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
                     <span className="material-icons text-sm">{isPositive ? 'arrow_upward' : 'arrow_downward'}</span>
                     <span className="sr-only">{isPositive ? 'Increased by' : 'Decreased by'}</span>
                     {Math.abs(percentChange)}%
@@ -89,10 +93,17 @@ function StatCardComponent({ title, value, percentChange, icon, color }: StatCar
 }
 
 function DashboardStatsLoading() {
+  const colors = [
+    "border-primary/20", 
+    "border-blue-500/20", 
+    "border-green-500/20", 
+    "border-amber-500/20"
+  ];
+  
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-6">
       {[1, 2, 3, 4].map((i) => (
-        <Card key={i}>
+        <Card key={i} className={`shadow-sm ${colors[i-1]} border`}>
           <CardContent className="px-4 py-5 sm:p-6">
             <div className="flex items-center">
               <Skeleton className="h-12 w-12 rounded-md" />

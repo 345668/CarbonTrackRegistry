@@ -10,16 +10,26 @@ export default function Dashboard() {
   return (
     <div>
       {/* Dashboard Header */}
-      <div className="mb-6">
+      <div className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-neutral-900">Carbon Registry Dashboard</h1>
-            <p className="mt-1 text-sm text-neutral-700">Overview of all carbon projects and credits</p>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+              Carbon Registry Dashboard
+            </h1>
+            <p className="mt-2 text-sm text-neutral-600 max-w-2xl">
+              Monitor your carbon offset projects, track verification progress, and manage credits in one central location
+            </p>
           </div>
-          <div className="mt-4 md:mt-0 flex space-x-3">
+          <div className="mt-6 md:mt-0 flex flex-wrap gap-3">
+            <Link href="/projects">
+              <Button variant="outline" className="inline-flex items-center gap-1.5 shadow-sm">
+                <span className="material-icons text-sm">view_list</span>
+                View All Projects
+              </Button>
+            </Link>
             <Link href="/projects/new">
-              <Button className="inline-flex items-center">
-                <span className="material-icons text-sm mr-2">add</span>
+              <Button className="inline-flex items-center gap-1.5 shadow-sm">
+                <span className="material-icons text-sm">add</span>
                 New Project
               </Button>
             </Link>

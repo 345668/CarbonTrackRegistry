@@ -98,6 +98,7 @@ export interface StatCard {
   percentChange?: number;
   icon: string;
   color: string;
+  borderColor?: string;
   prefix?: string;
   suffix?: string;
 }
