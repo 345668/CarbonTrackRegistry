@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -57,43 +58,59 @@ export default function Verification() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-neutral-900">Verification</h1>
-          <p className="mt-1 text-sm text-neutral-700">Manage the verification process for carbon projects</p>
+      {/* Header with Back Button */}
+      <div className="mb-8">
+        <div className="flex items-center mb-3">
+          <Link href="/">
+            <Button variant="ghost" size="sm" className="gap-1 -ml-2">
+              <span className="material-icons text-sm">arrow_back</span>
+              Dashboard
+            </Button>
+          </Link>
         </div>
-        <div className="mt-4 sm:mt-0">
-          <Dialog open={showRequestForm} onOpenChange={setShowRequestForm}>
-            <DialogTrigger asChild>
-              <Button className="inline-flex items-center">
-                <span className="material-icons text-sm mr-2">add</span>
-                Request Verification
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle>Request Project Verification</DialogTitle>
-                <DialogDescription>
-                  Submit a project for verification to validate its carbon reduction claims
-                </DialogDescription>
-              </DialogHeader>
-              <RequestVerificationForm 
-                projects={projects?.filter(p => p.status === "registered") || []} 
-                stages={stages || []}
-                onComplete={() => setShowRequestForm(false)} 
-              />
-            </DialogContent>
-          </Dialog>
+        
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+              Project Verification
+            </h1>
+            <p className="mt-2 text-sm text-neutral-600 max-w-2xl">
+              Track, review and manage the verification process for all registered carbon offset projects
+            </p>
+          </div>
+          <div className="mt-6 sm:mt-0">
+            <Dialog open={showRequestForm} onOpenChange={setShowRequestForm}>
+              <DialogTrigger asChild>
+                <Button className="inline-flex items-center gap-1.5 shadow-sm">
+                  <span className="material-icons text-sm">add</span>
+                  Request Verification
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                  <DialogTitle>Request Project Verification</DialogTitle>
+                  <DialogDescription>
+                    Submit a project for verification to validate its carbon reduction claims
+                  </DialogDescription>
+                </DialogHeader>
+                <RequestVerificationForm 
+                  projects={projects?.filter(p => p.status === "registered") || []} 
+                  stages={stages || []}
+                  onComplete={() => setShowRequestForm(false)} 
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
       
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-6">
-        <Card>
+        <Card className="shadow-sm border border-amber-500/20">
           <CardContent className="p-6">
             <div className="flex items-center">
-              <div className="bg-yellow-100 rounded-md p-3 mr-4">
-                <span className="material-icons text-yellow-600">pending_actions</span>
+              <div className="bg-amber-500/10 rounded-md p-3 mr-4">
+                <span className="material-icons text-amber-600">pending_actions</span>
               </div>
               <div>
                 <p className="text-sm font-medium text-neutral-500">Pending Verifications</p>
@@ -102,10 +119,10 @@ export default function Verification() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-sm border border-green-500/20">
           <CardContent className="p-6">
             <div className="flex items-center">
-              <div className="bg-green-100 rounded-md p-3 mr-4">
+              <div className="bg-green-500/10 rounded-md p-3 mr-4">
                 <span className="material-icons text-green-600">verified</span>
               </div>
               <div>
@@ -115,10 +132,10 @@ export default function Verification() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-sm border border-red-500/20">
           <CardContent className="p-6">
             <div className="flex items-center">
-              <div className="bg-red-100 rounded-md p-3 mr-4">
+              <div className="bg-red-500/10 rounded-md p-3 mr-4">
                 <span className="material-icons text-red-600">cancel</span>
               </div>
               <div>
@@ -131,14 +148,20 @@ export default function Verification() {
       </div>
       
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
+      <div className="bg-white p-5 rounded-lg shadow-sm border border-neutral-200 mb-6">
+        <div className="flex items-center mb-3">
+          <div className="flex-grow">
+            <h3 className="text-sm font-medium text-neutral-900">Filter Verifications</h3>
+            <p className="text-xs text-neutral-500 mt-0.5">Filter the verification list based on status and stage</p>
+          </div>
+        </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="status" className="text-sm font-medium text-neutral-700 mb-1 block">
+            <label htmlFor="status" className="text-sm font-medium text-neutral-700 mb-1.5 block">
               Status
             </label>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger id="status">
+              <SelectTrigger id="status" className="w-full">
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>
               <SelectContent>
@@ -151,11 +174,11 @@ export default function Verification() {
           </div>
           
           <div>
-            <label htmlFor="stage" className="text-sm font-medium text-neutral-700 mb-1 block">
-              Stage
+            <label htmlFor="stage" className="text-sm font-medium text-neutral-700 mb-1.5 block">
+              Verification Stage
             </label>
             <Select value={stageFilter} onValueChange={setStageFilter}>
-              <SelectTrigger id="stage">
+              <SelectTrigger id="stage" className="w-full">
                 <SelectValue placeholder="All stages" />
               </SelectTrigger>
               <SelectContent>
@@ -186,13 +209,14 @@ export default function Verification() {
 
 function VerificationListLoading() {
   return (
-    <Card>
-      <CardHeader>
-        <Skeleton className="h-6 w-40 mb-2" />
+    <Card className="border border-neutral-200 shadow-sm">
+      <CardHeader className="pb-3">
+        <Skeleton className="h-6 w-64 mb-1" />
+        <Skeleton className="h-4 w-40" />
       </CardHeader>
       <CardContent>
         <div className="rounded-md border">
-          <div className="grid grid-cols-5 border-b">
+          <div className="grid grid-cols-5 border-b bg-neutral-50">
             {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="p-4">
                 <Skeleton className="h-4 w-full" />
@@ -200,10 +224,10 @@ function VerificationListLoading() {
             ))}
           </div>
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="grid grid-cols-5 border-b">
+            <div key={i} className="grid grid-cols-5 border-b hover:bg-neutral-50">
               {[1, 2, 3, 4, 5].map((j) => (
                 <div key={j} className="p-4">
-                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className={`h-4 w-${j === 1 ? 'full' : j === 3 ? '16' : '24'}`} />
                 </div>
               ))}
             </div>
