@@ -8,10 +8,10 @@ export default function NewProject() {
       <div className="mb-6">
         <div className="flex items-center">
           <Link href="/projects">
-            <a className="text-primary hover:text-primary-dark mr-2">
+            <div className="text-primary hover:text-primary-dark mr-2 cursor-pointer">
               <span className="material-icons text-sm align-text-top">arrow_back</span>
               <span className="ml-1">Back to Projects</span>
-            </a>
+            </div>
           </Link>
         </div>
         <h1 className="text-2xl font-semibold text-neutral-900 mt-4">Register New Carbon Project</h1>
