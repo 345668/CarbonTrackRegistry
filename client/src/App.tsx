@@ -1,10 +1,12 @@
-import { Switch, Route } from "wouter";
+import { Switch, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
+import { AnimatePresence } from "framer-motion";
+import { AnimatedRoute } from "@/components/ui/animated-route";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import AppLayout from "./components/layout/AppLayout";
@@ -20,21 +22,25 @@ import NewProject from "./pages/NewProject";
 import ProjectDetail from "./pages/ProjectDetail";
 
 function Router() {
+  const [location] = useLocation();
+  
   return (
-    <Switch>
-      <Route path="/auth" component={AuthPage} />
-      <ProtectedRoute path="/" component={Dashboard} />
-      <ProtectedRoute path="/projects" component={Projects} />
-      <ProtectedRoute path="/projects/new" component={NewProject} />
-      <ProtectedRoute path="/projects/:id" component={ProjectDetail} />
-      <ProtectedRoute path="/carbon-credits" component={CarbonCredits} />
-      <ProtectedRoute path="/verification" component={Verification} />
-      <ProtectedRoute path="/map" component={MapView} />
-      <ProtectedRoute path="/methodologies" component={Methodologies} />
-      <ProtectedRoute path="/users" component={Users} />
-      <ProtectedRoute path="/settings" component={Settings} />
-      <Route component={NotFound} />
-    </Switch>
+    <AnimatePresence mode="wait" initial={false}>
+      <Switch key={location}>
+        <AnimatedRoute path="/auth" component={AuthPage} />
+        <ProtectedRoute path="/" component={Dashboard} />
+        <ProtectedRoute path="/projects" component={Projects} />
+        <ProtectedRoute path="/projects/new" component={NewProject} />
+        <ProtectedRoute path="/projects/:id" component={ProjectDetail} />
+        <ProtectedRoute path="/carbon-credits" component={CarbonCredits} />
+        <ProtectedRoute path="/verification" component={Verification} />
+        <ProtectedRoute path="/map" component={MapView} />
+        <ProtectedRoute path="/methodologies" component={Methodologies} />
+        <ProtectedRoute path="/users" component={Users} />
+        <ProtectedRoute path="/settings" component={Settings} />
+        <AnimatedRoute path="/:rest*" component={NotFound} />
+      </Switch>
+    </AnimatePresence>
   );
 }
 

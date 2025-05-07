@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { Redirect, Route, RouteComponentProps } from "wouter";
+import { PageTransition } from "@/components/ui/page-transition";
 
 interface ProtectedRouteProps {
   path: string;
@@ -25,7 +26,11 @@ export function ProtectedRoute({ path, component: Component }: ProtectedRoutePro
           return <Redirect to="/auth" />;
         }
 
-        return <Component {...params} />;
+        return (
+          <PageTransition>
+            <Component {...params} />
+          </PageTransition>
+        );
       }}
     </Route>
   );
