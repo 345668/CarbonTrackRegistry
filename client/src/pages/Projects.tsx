@@ -45,26 +45,46 @@ export default function Projects() {
   
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-neutral-900">Carbon Projects</h1>
-          <p className="mt-1 text-sm text-neutral-700">Manage and monitor all carbon offset projects</p>
-        </div>
-        <div className="mt-4 sm:mt-0">
-          <Link href="/projects/new">
-            <Button className="inline-flex items-center">
-              <span className="material-icons text-sm mr-2">add</span>
-              New Project
+      {/* Header with Back Button */}
+      <div className="mb-6">
+        <div className="flex items-center mb-3">
+          <Link href="/">
+            <Button variant="ghost" size="sm" className="gap-1 -ml-2">
+              <span className="material-icons text-sm">arrow_back</span>
+              Dashboard
             </Button>
           </Link>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-neutral-900 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+              Carbon Projects
+            </h1>
+            <p className="mt-2 text-sm text-neutral-600">
+              Register, manage and monitor carbon offset projects across different categories and regions
+            </p>
+          </div>
+          <div className="mt-4 sm:mt-0">
+            <Link href="/projects/new">
+              <Button className="inline-flex items-center gap-1.5 shadow-sm">
+                <span className="material-icons text-sm">add</span>
+                New Project
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
       
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="bg-white p-5 rounded-lg shadow mb-6 border border-gray-100">
+        <h3 className="text-sm font-semibold text-neutral-700 mb-3 flex items-center">
+          <span className="material-icons text-primary text-sm mr-1.5">filter_list</span>
+          Filter Projects
+        </h3>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
           <div>
-            <label htmlFor="search" className="text-sm font-medium text-neutral-700 mb-1 block">
+            <label htmlFor="search" className="text-xs font-medium uppercase tracking-wider text-neutral-500 mb-1.5 block">
               Search
             </label>
             <div className="relative">
@@ -74,8 +94,8 @@ export default function Projects() {
               <Input
                 id="search"
                 type="text"
-                placeholder="Search projects..."
-                className="pl-10"
+                placeholder="Project name, ID or description..."
+                className="pl-10 border-gray-200 focus:border-primary"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -83,36 +103,59 @@ export default function Projects() {
           </div>
           
           <div>
-            <label htmlFor="status" className="text-sm font-medium text-neutral-700 mb-1 block">
+            <label htmlFor="status" className="text-xs font-medium uppercase tracking-wider text-neutral-500 mb-1.5 block">
               Status
             </label>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger id="status">
+              <SelectTrigger id="status" className="border-gray-200 focus:border-primary">
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="registered">Registered</SelectItem>
-                <SelectItem value="verified">Verified</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
+                <SelectItem value="draft">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-gray-400"></span>
+                    Draft
+                  </div>
+                </SelectItem>
+                <SelectItem value="registered">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-blue-500"></span>
+                    Registered
+                  </div>
+                </SelectItem>
+                <SelectItem value="verified">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-green-500"></span>
+                    Verified
+                  </div>
+                </SelectItem>
+                <SelectItem value="rejected">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-red-500"></span>
+                    Rejected
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
           
           <div>
-            <label htmlFor="category" className="text-sm font-medium text-neutral-700 mb-1 block">
+            <label htmlFor="category" className="text-xs font-medium uppercase tracking-wider text-neutral-500 mb-1.5 block">
               Category
             </label>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger id="category">
+              <SelectTrigger id="category" className="border-gray-200 focus:border-primary">
                 <SelectValue placeholder="All categories" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All categories</SelectItem>
                 {categories?.map((category) => (
                   <SelectItem key={category.id} value={category.name}>
-                    {category.name}
+                    <div className="flex items-center gap-1.5">
+                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: category.color }}></span>
+                      {category.name}
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -145,13 +188,39 @@ export default function Projects() {
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-lg p-8 text-center">
-          <span className="material-icons text-5xl text-neutral-300 mb-2">eco</span>
-          <h3 className="text-lg font-medium text-neutral-900 mb-2">No projects found</h3>
-          <p className="text-neutral-500 mb-4">Try adjusting your search or filters</p>
-          <Link href="/projects/new">
-            <Button>Create Project</Button>
-          </Link>
+        <div className="bg-white rounded-xl p-10 text-center shadow-sm border border-gray-100">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+            <span className="material-icons text-3xl text-primary">eco</span>
+          </div>
+          <h3 className="text-xl font-semibold text-neutral-900 mb-2">No Carbon Projects Found</h3>
+          <p className="text-neutral-600 max-w-md mx-auto mb-6">
+            {search || statusFilter !== "" || categoryFilter !== "" ? 
+              "No projects match your current filters. Try adjusting your search criteria or clearing filters." :
+              "Get started by adding your first carbon offset project to begin monitoring and managing your climate impact."
+            }
+          </p>
+          <div className="flex justify-center space-x-3">
+            {(search || statusFilter !== "" || categoryFilter !== "") && (
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setSearch("");
+                  setStatusFilter("");
+                  setCategoryFilter("");
+                }}
+                className="gap-1.5"
+              >
+                <span className="material-icons text-sm">filter_alt_off</span>
+                Clear Filters
+              </Button>
+            )}
+            <Link href="/projects/new">
+              <Button className="shadow-sm gap-1.5">
+                <span className="material-icons text-sm">add</span>
+                Create New Project
+              </Button>
+            </Link>
+          </div>
         </div>
       )}
     </div>
