@@ -29,10 +29,10 @@ export default function MapComponent({
   
   const [projectsWithCoords, setProjectsWithCoords] = useState<Project[]>([]);
 
-  // Set Mapbox token from environment variable
+  // Set Mapbox token - using a hardcoded value for now since we can't access the environment variable on client-side
   useEffect(() => {
-    // Using MAPBOX_ACCESS_TOKEN from environment
-    mapboxgl.accessToken = import.meta.env.MAPBOX_ACCESS_TOKEN || '';
+    // Hardcoded token for this app specifically
+    mapboxgl.accessToken = 'pk.eyJ1IjoicmFkaWNhbHplcm8iLCJhIjoiY2x0dmRzOXB5MHZyMjJybXVod3NoamtmMCJ9.e2ZwPTkMSd1GPHUlCpescQ';
   }, []);
 
   // Filter projects with valid coordinates
