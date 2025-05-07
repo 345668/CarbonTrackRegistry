@@ -129,7 +129,7 @@ export default function MapComponent({
       dot.style.width = '16px';
       dot.style.height = '16px';
       dot.style.borderRadius = '50%';
-      dot.style.backgroundColor = getCategoryColor(project.category);
+      dot.style.backgroundColor = getCategoryColor(project.category, true);
       dot.style.boxShadow = '0 0 0 3px rgba(255,255,255,0.5)';
       markerEl.appendChild(dot);
       
@@ -157,7 +157,7 @@ export default function MapComponent({
                 <div class="p-2">
                   <div 
                     class="w-full h-1 rounded-full mb-2" 
-                    style="background-color: ${getCategoryColor(project.category)}"
+                    style="background-color: ${getCategoryColor(project.category, true)}"
                   ></div>
                   <h3 class="text-sm font-semibold">${project.name}</h3>
                   <p class="text-xs opacity-70">${project.location}</p>

@@ -61,19 +61,19 @@ export function getStatusColor(status: string): string {
   }
 }
 
-export function getCategoryColor(category: string): string {
-  switch (category.toLowerCase()) {
-    case 'forestry':
-      return 'bg-green-100 text-green-800';
-    case 'renewable energy':
-      return 'bg-blue-100 text-blue-800';
-    case 'agriculture':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'waste management':
-      return 'bg-purple-100 text-purple-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
+export function getCategoryColor(category: string, rawColor: boolean = false): string {
+  const colorMap: Record<string, { tailwind: string, hex: string }> = {
+    'forestry': { tailwind: 'bg-green-100 text-green-800', hex: '#059669' },
+    'renewable energy': { tailwind: 'bg-blue-100 text-blue-800', hex: '#1d4ed8' },
+    'agriculture': { tailwind: 'bg-yellow-100 text-yellow-800', hex: '#d97706' },
+    'waste management': { tailwind: 'bg-purple-100 text-purple-800', hex: '#7e22ce' },
+    'default': { tailwind: 'bg-gray-100 text-gray-800', hex: '#6b7280' }
+  };
+
+  const categoryKey = category.toLowerCase();
+  const colorInfo = colorMap[categoryKey] || colorMap['default'];
+  
+  return rawColor ? colorInfo.hex : colorInfo.tailwind;
 }
 
 export function getVerificationStageColor(stage: string): string {
