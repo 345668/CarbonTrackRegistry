@@ -12,6 +12,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+// Import Radical Zero logo from assets
+import RadicalZeroLogo from "@assets/Radical-Zero (1).png";
+
 // Create the login schema
 const loginSchema = z.object({
   username: z.string().min(2, "Username must be at least 2 characters."),
@@ -90,6 +93,9 @@ export default function AuthPage() {
         <Card className="w-full max-w-md">
           <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab}>
             <CardHeader>
+              <div className="flex justify-center mb-4">
+                <img src={RadicalZeroLogo} alt="Radical Zero Logo" className="h-16" />
+              </div>
               <CardTitle className="text-2xl text-center mb-2">Carbon Registry Platform</CardTitle>
               <CardDescription className="text-center mb-4">Login or create an account to manage carbon projects</CardDescription>
               <TabsList className="grid w-full grid-cols-2">
@@ -130,7 +136,7 @@ export default function AuthPage() {
                     />
                     <Button
                       type="submit"
-                      className="w-full"
+                      className="w-full btn-radical"
                       disabled={loginMutation.isPending}
                     >
                       {loginMutation.isPending ? "Logging in..." : "Login"}
@@ -227,7 +233,7 @@ export default function AuthPage() {
                     />
                     <Button
                       type="submit"
-                      className="w-full"
+                      className="w-full btn-radical"
                       disabled={registerMutation.isPending}
                     >
                       {registerMutation.isPending ? "Creating account..." : "Create Account"}
@@ -259,48 +265,77 @@ export default function AuthPage() {
       </div>
 
       {/* Right Column - Hero Section */}
-      <div className="hidden md:flex md:flex-1 bg-primary p-8 text-white flex-col justify-center">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl font-bold tracking-tight mb-4">
-            UNDP Carbon Registry Platform
+      <div className="hidden md:flex md:flex-1 bg-[#00082d] p-8 text-white flex-col justify-center relative overflow-hidden">
+        {/* Background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Carbon tag icons */}
+          <div className="absolute top-1/4 left-1/4 transform -translate-x-1/2 -translate-y-1/2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-white opacity-30" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+          </div>
+          <div className="absolute top-3/4 right-1/4 transform -translate-x-1/2 -translate-y-1/2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-white opacity-30" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+          </div>
+          <div className="absolute top-1/3 right-1/6 transform -translate-x-1/2 -translate-y-1/2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20 text-white opacity-30" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+          </div>
+          <div className="absolute bottom-1/4 left-1/6 transform -translate-x-1/2 -translate-y-1/2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-14 w-14 text-white opacity-30" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+          </div>
+          <div className="absolute top-2/3 left-3/4 transform -translate-x-1/2 -translate-y-1/2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-white opacity-30" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+          </div>
+        </div>
+        
+        {/* Center logo and content */}
+        <div className="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
+          <div className="mb-8 bg-white p-4 rounded-lg shadow-[0_0_40px_rgba(79,70,229,0.6)]">
+            <img src={RadicalZeroLogo} alt="Radical Zero Logo" className="h-24" />
+          </div>
+          
+          <h1 className="text-4xl font-bold tracking-tight mb-4 text-center">
+            Radical Zero Carbon Registry Platform
           </h1>
-          <p className="text-xl mb-8">
+          
+          <p className="text-xl mb-8 text-center">
             A comprehensive solution for registering, verifying, and tracking carbon offset projects
             and credits. Help combat climate change by supporting sustainable initiatives and
             monitoring their impact.
           </p>
-          <div className="space-y-4">
-            <div className="flex items-start space-x-2">
-              <div className="bg-white text-primary p-1 rounded-full mt-1">
+          
+          <div className="space-y-4 w-full max-w-md">
+            <div className="flex items-start space-x-3 bg-white/10 p-3 rounded-lg">
+              <div className="bg-[#5b67f8] text-white p-1 rounded-full mt-1">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               </div>
               <p className="text-sm">Register and monitor carbon offset projects</p>
             </div>
-            <div className="flex items-start space-x-2">
-              <div className="bg-white text-primary p-1 rounded-full mt-1">
+            <div className="flex items-start space-x-3 bg-white/10 p-3 rounded-lg">
+              <div className="bg-[#5b67f8] text-white p-1 rounded-full mt-1">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               </div>
               <p className="text-sm">Track verification stages and project statuses</p>
             </div>
-            <div className="flex items-start space-x-2">
-              <div className="bg-white text-primary p-1 rounded-full mt-1">
+            <div className="flex items-start space-x-3 bg-white/10 p-3 rounded-lg">
+              <div className="bg-[#5b67f8] text-white p-1 rounded-full mt-1">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               </div>
               <p className="text-sm">Manage and transfer carbon credits</p>
-            </div>
-            <div className="flex items-start space-x-2">
-              <div className="bg-white text-primary p-1 rounded-full mt-1">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <p className="text-sm">Support sustainable development goals</p>
             </div>
           </div>
         </div>
