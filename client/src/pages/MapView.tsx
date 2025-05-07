@@ -30,7 +30,7 @@ export default function MapView() {
       {/* Header */}
       <header className="bg-white border-b h-16 px-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Link href="/dashboard">
+          <Link href="/">
             <Button variant="ghost" size="sm" className="gap-1">
               <ArrowLeft className="h-4 w-4" />
               Back to Dashboard

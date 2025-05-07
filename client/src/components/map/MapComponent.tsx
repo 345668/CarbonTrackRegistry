@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import { Project } from '@/types';
 import { getCategoryColor } from '@/lib/utils';
 import L from 'leaflet';
+import { useQuery } from '@tanstack/react-query';
 
 // Default map settings
 const DEFAULT_LONGITUDE = -0.1;
@@ -97,11 +98,28 @@ export default function MapComponent({
     }
   }, [projects]);
 
+  // Query for categories to get actual colors
+  const { data: categories } = useQuery<any[]>({
+    queryKey: ["/api/categories"],
+  });
+
   // Create custom marker icons for each project
   const createCustomIcon = (category: string) => {
+    // Find the matching category to get the correct color
+    let color = '#5b67f8'; // Default to brand color if not found
+    
+    if (categories) {
+      const matchingCategory = categories.find(
+        cat => cat.name.toLowerCase() === category.toLowerCase()
+      );
+      if (matchingCategory) {
+        color = matchingCategory.color;
+      }
+    }
+
     return L.divIcon({
       className: 'custom-marker',
-      html: `<div style="width: 16px; height: 16px; border-radius: 50%; background-color: ${getCategoryColor(category, true)}; box-shadow: 0 0 0 3px rgba(255,255,255,0.5);"></div>`,
+      html: `<div style="width: 16px; height: 16px; border-radius: 50%; background-color: ${color}; box-shadow: 0 0 0 3px rgba(255,255,255,0.5);"></div>`,
       iconSize: [16, 16],
       iconAnchor: [8, 8],
     });
@@ -146,15 +164,29 @@ export default function MapComponent({
                   <div style={{ maxWidth: "300px" }}>
                     <div 
                       className="w-full h-1 rounded-full mb-2" 
-                      style={{ backgroundColor: getCategoryColor(project.category, true) }}
+                      style={{ backgroundColor: categories?.find(cat => 
+                        cat.name.toLowerCase() === project.category.toLowerCase()
+                      )?.color || '#5b67f8' }}
                     ></div>
                     <h3 className="text-sm font-semibold">{project.name}</h3>
                     <p className="text-xs opacity-70">{project.location}</p>
                     <div className="flex items-center mt-1 gap-1.5">
-                      <span className="text-xs inline-flex items-center bg-gray-100 px-2 py-0.5 rounded-full">
+                      <span 
+                        className="text-xs inline-flex items-center px-2 py-0.5 rounded-full" 
+                        style={{ 
+                          backgroundColor: `${categories?.find(cat => cat.name.toLowerCase() === project.category.toLowerCase())?.color}20` || 'rgba(91, 103, 248, 0.2)',
+                          color: categories?.find(cat => cat.name.toLowerCase() === project.category.toLowerCase())?.color || '#5b67f8'
+                        }}
+                      >
                         {project.category}
                       </span>
-                      <span className="text-xs inline-flex items-center bg-gray-100 px-2 py-0.5 rounded-full">
+                      <span className={`text-xs inline-flex items-center px-2 py-0.5 rounded-full ${
+                        project.status === 'verified' 
+                          ? 'bg-green-100 text-green-800' 
+                          : project.status === 'registered' 
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-gray-100 text-gray-800'
+                      }`}>
                         {project.status}
                       </span>
                     </div>
