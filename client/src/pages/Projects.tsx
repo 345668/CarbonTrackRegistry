@@ -37,7 +37,7 @@ export default function Projects() {
       project.description.toLowerCase().includes(search.toLowerCase()) ||
       project.projectId.toLowerCase().includes(search.toLowerCase());
     
-    const matchesStatus = statusFilter === "" || project.status === statusFilter;
+    const matchesStatus = statusFilter === "all" || project.status === statusFilter;
     const matchesCategory = categoryFilter === "" || project.category === categoryFilter;
     
     return matchesSearch && matchesStatus && matchesCategory;
@@ -109,7 +109,7 @@ export default function Projects() {
                 <SelectValue placeholder="All categories" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All categories</SelectItem>
+                <SelectItem value="all">All categories</SelectItem>
                 {categories?.map((category) => (
                   <SelectItem key={category.id} value={category.name}>
                     {category.name}

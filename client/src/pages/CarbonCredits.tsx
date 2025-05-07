@@ -161,7 +161,7 @@ export default function CarbonCredits() {
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All statuses</SelectItem>
+                <SelectItem value="all">All statuses</SelectItem>
                 <SelectItem value="available">Available</SelectItem>
                 <SelectItem value="retired">Retired</SelectItem>
                 <SelectItem value="transferred">Transferred</SelectItem>

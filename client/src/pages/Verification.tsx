@@ -142,7 +142,7 @@ export default function Verification() {
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All statuses</SelectItem>
+                <SelectItem value="all">All statuses</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="approved">Approved</SelectItem>
                 <SelectItem value="rejected">Rejected</SelectItem>
@@ -159,7 +159,7 @@ export default function Verification() {
                 <SelectValue placeholder="All stages" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All stages</SelectItem>
+                <SelectItem value="all">All stages</SelectItem>
                 {stages?.map((stage) => (
                   <SelectItem key={stage.id} value={stage.id.toString()}>
                     {stage.name}

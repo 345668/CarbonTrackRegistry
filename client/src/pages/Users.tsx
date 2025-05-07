@@ -266,7 +266,7 @@ export default function Users() {
                 <SelectValue placeholder="All roles" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All roles</SelectItem>
+                <SelectItem value="all">All roles</SelectItem>
                 <SelectItem value="admin">Administrator</SelectItem>
                 <SelectItem value="verifier">Verifier</SelectItem>
                 <SelectItem value="project_developer">Project Developer</SelectItem>
