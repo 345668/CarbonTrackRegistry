@@ -78,7 +78,8 @@ export default function AuthPage() {
     const { confirmPassword, organization, ...userData } = values;
     registerMutation.mutate({
       ...userData,
-      organization: organization || undefined
+      role: "user", // Set default role
+      organization: organization || undefined // Convert null to undefined
     });
   }
 
@@ -206,21 +207,19 @@ export default function AuthPage() {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={registerForm.control}
-                      name="role"
-                      render={({ field }) => (
-                        <input type="hidden" value="user" {...field} />
-                      )}
-                    />
+                    {/* Role is handled in onRegisterSubmit */}
                     <FormField
                       control={registerForm.control}
                       name="organization"
-                      render={({ field }) => (
+                      render={({ field: { value, ...fieldProps } }) => (
                         <FormItem>
                           <FormLabel>Organization (Optional)</FormLabel>
                           <FormControl>
-                            <Input placeholder="Enter your organization" {...field} />
+                            <Input 
+                              placeholder="Enter your organization" 
+                              value={value || ''} 
+                              {...fieldProps} 
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
