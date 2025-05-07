@@ -27,8 +27,9 @@ import {
   type Statistics,
   type InsertStatistics
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, desc, like, sql, and, or } from "drizzle-orm";
 
-// Interface for storage operations
 export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
@@ -89,548 +90,267 @@ export interface IStorage {
   updateStatistics(stats: Partial<InsertStatistics>): Promise<Statistics | undefined>;
 }
 
-// In-memory storage implementation
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private projectCategories: Map<number, ProjectCategory>;
-  private methodologies: Map<number, Methodology>;
-  private projects: Map<number, Project>;
-  private verificationStages: Map<number, VerificationStage>;
-  private projectVerifications: Map<number, ProjectVerification>;
-  private carbonCredits: Map<number, CarbonCredit>;
-  private activityLogs: Map<number, ActivityLog>;
-  private stats: Statistics | undefined;
-  
-  private userIdCounter: number;
-  private projectCategoryIdCounter: number;
-  private methodologyIdCounter: number;
-  private projectIdCounter: number;
-  private verificationStageIdCounter: number;
-  private projectVerificationIdCounter: number;
-  private carbonCreditIdCounter: number;
-  private activityLogIdCounter: number;
-  
-  constructor() {
-    this.users = new Map();
-    this.projectCategories = new Map();
-    this.methodologies = new Map();
-    this.projects = new Map();
-    this.verificationStages = new Map();
-    this.projectVerifications = new Map();
-    this.carbonCredits = new Map();
-    this.activityLogs = new Map();
-    
-    this.userIdCounter = 1;
-    this.projectCategoryIdCounter = 1;
-    this.methodologyIdCounter = 1;
-    this.projectIdCounter = 1;
-    this.verificationStageIdCounter = 1;
-    this.projectVerificationIdCounter = 1;
-    this.carbonCreditIdCounter = 1;
-    this.activityLogIdCounter = 1;
-    
-    // Initialize with default data
-    this.initializeDefaultData();
-  }
-  
-  private initializeDefaultData(): void {
-    // Create default categories
-    const forestry = this.createProjectCategory({
-      name: "Forestry",
-      description: "Forest conservation and reforestation projects",
-      color: "#00C781" // Green
-    });
-    
-    const renewableEnergy = this.createProjectCategory({
-      name: "Renewable Energy",
-      description: "Solar, wind, and other renewable energy projects",
-      color: "#3395dd" // Blue
-    });
-    
-    const agriculture = this.createProjectCategory({
-      name: "Agriculture",
-      description: "Sustainable agriculture and soil management",
-      color: "#FFAA15" // Yellow
-    });
-    
-    const wasteManagement = this.createProjectCategory({
-      name: "Waste Management",
-      description: "Waste reduction and methane capture projects",
-      color: "#8A4BD2" // Purple
-    });
-    
-    // Create default methodologies
-    this.createMethodology({
-      name: "Afforestation/Reforestation",
-      description: "Methodology for afforestation and reforestation projects",
-      category: "Forestry",
-      documentUrl: "https://example.com/methodologies/ar"
-    });
-    
-    this.createMethodology({
-      name: "REDD+",
-      description: "Reducing Emissions from Deforestation and Forest Degradation",
-      category: "Forestry",
-      documentUrl: "https://example.com/methodologies/redd"
-    });
-    
-    this.createMethodology({
-      name: "Solar Energy",
-      description: "Methodology for solar energy projects",
-      category: "Renewable Energy",
-      documentUrl: "https://example.com/methodologies/solar"
-    });
-    
-    this.createMethodology({
-      name: "Wind Energy",
-      description: "Methodology for wind energy projects",
-      category: "Renewable Energy",
-      documentUrl: "https://example.com/methodologies/wind"
-    });
-    
-    this.createMethodology({
-      name: "Sustainable Agriculture",
-      description: "Methodology for sustainable agriculture practices",
-      category: "Agriculture",
-      documentUrl: "https://example.com/methodologies/agriculture"
-    });
-    
-    this.createMethodology({
-      name: "Waste to Energy",
-      description: "Methodology for waste to energy projects",
-      category: "Waste Management",
-      documentUrl: "https://example.com/methodologies/waste"
-    });
-    
-    // Create default verification stages
-    this.createVerificationStage({
-      name: "Data Validation",
-      description: "Initial validation of project data and documentation",
-      order: 1
-    });
-    
-    this.createVerificationStage({
-      name: "Field Audit",
-      description: "On-site verification of project activities",
-      order: 2
-    });
-    
-    this.createVerificationStage({
-      name: "Final Review",
-      description: "Final review and decision on project verification",
-      order: 3
-    });
-    
-    // Create default admin user
-    this.createUser({
-      username: "admin",
-      password: "password", // In a real app, this would be hashed
-      fullName: "Admin User",
-      email: "admin@example.com",
-      role: "admin",
-      organization: "UNDP"
-    });
-    
-    // Create default statistics
-    this.stats = {
-      id: 1,
-      totalProjects: 87,
-      verifiedProjects: 62,
-      pendingVerification: 14,
-      totalCredits: 1248392,
-      lastUpdated: new Date()
-    };
-    
-    // Create example projects
-    const amazonProject = this.createProject({
-      projectId: "BRA-2023-0001",
-      name: "Amazon Rainforest Conservation Project",
-      description: "Conservation of 50,000 hectares of rainforest in Brazil to prevent deforestation and protect biodiversity.",
-      category: "Forestry",
-      methodology: "REDD+",
-      developer: "admin",
-      location: "Brazil",
-      coordinates: { type: "Point", coordinates: [-59.1, -3.1] },
-      startDate: "2023-01-01",
-      endDate: "2033-01-01",
-      status: "verified",
-      estimatedReduction: 120000,
-      imageUrl: "https://images.unsplash.com/photo-1448375240586-882707db888b"
-    });
-    
-    this.createProject({
-      projectId: "IDN-2023-0002",
-      name: "Solar Energy Initiative - Phase 2",
-      description: "Installation of 5MW solar power generation capacity in rural communities across Southeast Asia.",
-      category: "Renewable Energy",
-      methodology: "Solar Energy",
-      developer: "admin",
-      location: "Indonesia",
-      coordinates: { type: "Point", coordinates: [106.8, -6.2] },
-      startDate: "2023-02-01",
-      endDate: "2033-02-01",
-      status: "registered",
-      estimatedReduction: 85500,
-      imageUrl: "https://images.unsplash.com/photo-1509391366360-2e959784a276"
-    });
-    
-    this.createProject({
-      projectId: "KEN-2023-0003",
-      name: "Sustainable Agriculture Project",
-      description: "Implementing sustainable farming practices across 2,000 farms in East Africa, reducing emissions and improving soil health.",
-      category: "Agriculture",
-      methodology: "Sustainable Agriculture",
-      developer: "admin",
-      location: "Kenya",
-      coordinates: { type: "Point", coordinates: [37.9, -0.4] },
-      startDate: "2023-03-01",
-      endDate: "2033-03-01",
-      status: "verified",
-      estimatedReduction: 25000,
-      imageUrl: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449"
-    });
-    
-    // Create verification requests
-    this.createProjectVerification({
-      projectId: "KEN-2023-0045",
-      verifier: "admin",
-      currentStage: 1, // Data Validation
-      status: "pending",
-      estimatedCompletionDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-      notes: "Initial verification request"
-    });
-    
-    this.createProjectVerification({
-      projectId: "GHA-2023-0018",
-      verifier: "admin",
-      currentStage: 2, // Field Audit
-      status: "pending",
-      estimatedCompletionDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
-      notes: "Proceeding to field audit"
-    });
-    
-    this.createProjectVerification({
-      projectId: "PHL-2023-0031",
-      verifier: "admin",
-      currentStage: 3, // Final Review
-      status: "pending",
-      estimatedCompletionDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
-      notes: "Completing final review"
-    });
-    
-    // Create carbon credits for Amazon project
-    this.createCarbonCredit({
-      serialNumber: "CR-BRA-2023-0001-20230101-20240101-001",
-      projectId: "BRA-2023-0001",
-      vintage: "2023",
-      quantity: 120000,
-      status: "available",
-      owner: "admin"
-    });
-    
-    // Create carbon credits for Kenya project
-    this.createCarbonCredit({
-      serialNumber: "CR-KEN-2023-0003-20230301-20240301-001",
-      projectId: "KEN-2023-0003",
-      vintage: "2023",
-      quantity: 25000,
-      status: "available",
-      owner: "admin"
-    });
-    
-    // Create activity logs
-    this.createActivityLog({
-      action: "project_registered",
-      description: "New project registered",
-      entityType: "project",
-      entityId: "BRA-2023-0001",
-      userId: 1
-    });
-    
-    this.createActivityLog({
-      action: "project_verified",
-      description: "Project verified",
-      entityType: "project",
-      entityId: "KEN-2023-0003",
-      userId: 1
-    });
-    
-    this.createActivityLog({
-      action: "credit_issued",
-      description: "Carbon credits issued",
-      entityType: "credit",
-      entityId: "CR-KEN-2023-0003-20230301-20240301-001",
-      userId: 1
-    });
-    
-    this.createActivityLog({
-      action: "verification_requested",
-      description: "Verification requested",
-      entityType: "verification",
-      entityId: "KEN-2023-0045",
-      userId: 1
-    });
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
-  // User operations
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-  
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
   
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.email === email
-    );
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
   }
-  
+
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.userIdCounter++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
     return user;
   }
   
   async listUsers(): Promise<User[]> {
-    return Array.from(this.users.values());
+    return await db.select().from(users);
   }
   
-  // Project Category operations
   async getProjectCategory(id: number): Promise<ProjectCategory | undefined> {
-    return this.projectCategories.get(id);
+    const [category] = await db.select().from(projectCategories).where(eq(projectCategories.id, id));
+    return category || undefined;
   }
   
   async getProjectCategoryByName(name: string): Promise<ProjectCategory | undefined> {
-    return Array.from(this.projectCategories.values()).find(
-      (category) => category.name === name
-    );
+    const [category] = await db.select().from(projectCategories).where(eq(projectCategories.name, name));
+    return category || undefined;
   }
   
   async createProjectCategory(category: InsertProjectCategory): Promise<ProjectCategory> {
-    const id = this.projectCategoryIdCounter++;
-    const projectCategory: ProjectCategory = { ...category, id };
-    this.projectCategories.set(id, projectCategory);
-    return projectCategory;
+    const [newCategory] = await db
+      .insert(projectCategories)
+      .values(category)
+      .returning();
+    return newCategory;
   }
   
   async listProjectCategories(): Promise<ProjectCategory[]> {
-    return Array.from(this.projectCategories.values());
+    return await db.select().from(projectCategories);
   }
   
-  // Methodology operations
   async getMethodology(id: number): Promise<Methodology | undefined> {
-    return this.methodologies.get(id);
+    const [methodology] = await db.select().from(methodologies).where(eq(methodologies.id, id));
+    return methodology || undefined;
   }
   
   async getMethodologyByName(name: string): Promise<Methodology | undefined> {
-    return Array.from(this.methodologies.values()).find(
-      (methodology) => methodology.name === name
-    );
+    const [methodology] = await db.select().from(methodologies).where(eq(methodologies.name, name));
+    return methodology || undefined;
   }
   
   async createMethodology(methodology: InsertMethodology): Promise<Methodology> {
-    const id = this.methodologyIdCounter++;
-    const newMethodology: Methodology = { ...methodology, id };
-    this.methodologies.set(id, newMethodology);
+    const [newMethodology] = await db
+      .insert(methodologies)
+      .values(methodology)
+      .returning();
     return newMethodology;
   }
   
   async listMethodologies(): Promise<Methodology[]> {
-    return Array.from(this.methodologies.values());
+    return await db.select().from(methodologies);
   }
   
-  // Project operations
   async getProject(id: number): Promise<Project | undefined> {
-    return this.projects.get(id);
+    const [project] = await db.select().from(projects).where(eq(projects.id, id));
+    return project || undefined;
   }
   
   async getProjectByProjectId(projectId: string): Promise<Project | undefined> {
-    return Array.from(this.projects.values()).find(
-      (project) => project.projectId === projectId
-    );
+    const [project] = await db.select().from(projects).where(eq(projects.projectId, projectId));
+    return project || undefined;
   }
   
   async createProject(project: InsertProject): Promise<Project> {
-    const id = this.projectIdCounter++;
-    const createdAt = new Date();
-    const newProject: Project = { ...project, id, createdAt };
-    this.projects.set(id, newProject);
+    const [newProject] = await db
+      .insert(projects)
+      .values({
+        ...project,
+        createdAt: new Date().toISOString()
+      })
+      .returning();
     return newProject;
   }
   
   async updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined> {
-    const existingProject = this.projects.get(id);
-    if (!existingProject) return undefined;
-    
-    const updatedProject: Project = { ...existingProject, ...project };
-    this.projects.set(id, updatedProject);
-    return updatedProject;
+    const [updatedProject] = await db
+      .update(projects)
+      .set(project)
+      .where(eq(projects.id, id))
+      .returning();
+    return updatedProject || undefined;
   }
   
   async listProjects(): Promise<Project[]> {
-    return Array.from(this.projects.values());
+    return await db.select().from(projects);
   }
   
   async listProjectsByStatus(status: string): Promise<Project[]> {
-    return Array.from(this.projects.values()).filter(
-      (project) => project.status === status
-    );
+    return await db.select().from(projects).where(eq(projects.status, status));
   }
   
   async listProjectsByDeveloper(developer: string): Promise<Project[]> {
-    return Array.from(this.projects.values()).filter(
-      (project) => project.developer === developer
-    );
+    return await db.select().from(projects).where(eq(projects.developer, developer));
   }
   
-  // Verification Stage operations
   async getVerificationStage(id: number): Promise<VerificationStage | undefined> {
-    return this.verificationStages.get(id);
+    const [stage] = await db.select().from(verificationStages).where(eq(verificationStages.id, id));
+    return stage || undefined;
   }
   
   async createVerificationStage(stage: InsertVerificationStage): Promise<VerificationStage> {
-    const id = this.verificationStageIdCounter++;
-    const newStage: VerificationStage = { ...stage, id };
-    this.verificationStages.set(id, newStage);
+    const [newStage] = await db
+      .insert(verificationStages)
+      .values(stage)
+      .returning();
     return newStage;
   }
   
   async listVerificationStages(): Promise<VerificationStage[]> {
-    return Array.from(this.verificationStages.values()).sort((a, b) => a.order - b.order);
+    return await db.select().from(verificationStages).orderBy(verificationStages.order);
   }
   
-  // Project Verification operations
   async getProjectVerification(id: number): Promise<ProjectVerification | undefined> {
-    return this.projectVerifications.get(id);
+    const [verification] = await db.select().from(projectVerifications).where(eq(projectVerifications.id, id));
+    return verification || undefined;
   }
   
   async getProjectVerificationByProjectId(projectId: string): Promise<ProjectVerification | undefined> {
-    return Array.from(this.projectVerifications.values()).find(
-      (verification) => verification.projectId === projectId
-    );
+    const [verification] = await db.select().from(projectVerifications).where(eq(projectVerifications.projectId, projectId));
+    return verification || undefined;
   }
   
   async createProjectVerification(verification: InsertProjectVerification): Promise<ProjectVerification> {
-    const id = this.projectVerificationIdCounter++;
-    const submittedDate = new Date();
-    const newVerification: ProjectVerification = { 
-      ...verification, 
-      id, 
-      submittedDate,
-      completedDate: undefined
-    };
-    this.projectVerifications.set(id, newVerification);
+    const [newVerification] = await db
+      .insert(projectVerifications)
+      .values({
+        ...verification,
+        submittedDate: new Date().toISOString()
+      })
+      .returning();
     return newVerification;
   }
   
   async updateProjectVerification(id: number, verification: Partial<InsertProjectVerification>): Promise<ProjectVerification | undefined> {
-    const existingVerification = this.projectVerifications.get(id);
-    if (!existingVerification) return undefined;
-    
-    const updatedVerification: ProjectVerification = { ...existingVerification, ...verification };
-    this.projectVerifications.set(id, updatedVerification);
-    return updatedVerification;
+    const [updatedVerification] = await db
+      .update(projectVerifications)
+      .set(verification)
+      .where(eq(projectVerifications.id, id))
+      .returning();
+    return updatedVerification || undefined;
   }
   
   async listProjectVerifications(): Promise<ProjectVerification[]> {
-    return Array.from(this.projectVerifications.values());
+    return await db.select().from(projectVerifications);
   }
   
   async listProjectVerificationsByStatus(status: string): Promise<ProjectVerification[]> {
-    return Array.from(this.projectVerifications.values()).filter(
-      (verification) => verification.status === status
-    );
+    return await db.select().from(projectVerifications).where(eq(projectVerifications.status, status));
   }
   
-  // Carbon Credit operations
   async getCarbonCredit(id: number): Promise<CarbonCredit | undefined> {
-    return this.carbonCredits.get(id);
+    const [credit] = await db.select().from(carbonCredits).where(eq(carbonCredits.id, id));
+    return credit || undefined;
   }
   
   async getCarbonCreditBySerialNumber(serialNumber: string): Promise<CarbonCredit | undefined> {
-    return Array.from(this.carbonCredits.values()).find(
-      (credit) => credit.serialNumber === serialNumber
-    );
+    const [credit] = await db.select().from(carbonCredits).where(eq(carbonCredits.serialNumber, serialNumber));
+    return credit || undefined;
   }
   
   async createCarbonCredit(credit: InsertCarbonCredit): Promise<CarbonCredit> {
-    const id = this.carbonCreditIdCounter++;
-    const issuanceDate = new Date();
-    const newCredit: CarbonCredit = { 
-      ...credit, 
-      id, 
-      issuanceDate,
-      retirementDate: undefined 
-    };
-    this.carbonCredits.set(id, newCredit);
+    const [newCredit] = await db
+      .insert(carbonCredits)
+      .values({
+        ...credit,
+        issuanceDate: new Date().toISOString()
+      })
+      .returning();
     return newCredit;
   }
   
   async updateCarbonCredit(id: number, credit: Partial<InsertCarbonCredit>): Promise<CarbonCredit | undefined> {
-    const existingCredit = this.carbonCredits.get(id);
-    if (!existingCredit) return undefined;
-    
-    const updatedCredit: CarbonCredit = { ...existingCredit, ...credit };
-    if (credit.status === "retired" && !existingCredit.retirementDate) {
-      updatedCredit.retirementDate = new Date();
-    }
-    this.carbonCredits.set(id, updatedCredit);
-    return updatedCredit;
+    const [updatedCredit] = await db
+      .update(carbonCredits)
+      .set(credit)
+      .where(eq(carbonCredits.id, id))
+      .returning();
+    return updatedCredit || undefined;
   }
   
   async listCarbonCredits(): Promise<CarbonCredit[]> {
-    return Array.from(this.carbonCredits.values());
+    return await db.select().from(carbonCredits);
   }
   
   async listCarbonCreditsByProjectId(projectId: string): Promise<CarbonCredit[]> {
-    return Array.from(this.carbonCredits.values()).filter(
-      (credit) => credit.projectId === projectId
-    );
+    return await db.select().from(carbonCredits).where(eq(carbonCredits.projectId, projectId));
   }
   
   async listCarbonCreditsByOwner(owner: string): Promise<CarbonCredit[]> {
-    return Array.from(this.carbonCredits.values()).filter(
-      (credit) => credit.owner === owner
-    );
+    return await db.select().from(carbonCredits).where(eq(carbonCredits.owner, owner));
   }
   
-  // Activity Log operations
   async createActivityLog(log: InsertActivityLog): Promise<ActivityLog> {
-    const id = this.activityLogIdCounter++;
-    const timestamp = new Date();
-    const newLog: ActivityLog = { ...log, id, timestamp };
-    this.activityLogs.set(id, newLog);
+    const [newLog] = await db
+      .insert(activityLogs)
+      .values({
+        ...log,
+        timestamp: new Date().toISOString()
+      })
+      .returning();
     return newLog;
   }
   
   async listActivityLogs(limit?: number): Promise<ActivityLog[]> {
-    const logs = Array.from(this.activityLogs.values())
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    const query = db.select().from(activityLogs).orderBy(desc(activityLogs.timestamp));
     
-    return limit ? logs.slice(0, limit) : logs;
+    if (limit) {
+      query.limit(limit);
+    }
+    
+    return await query;
   }
   
-  // Statistics operations
   async getStatistics(): Promise<Statistics | undefined> {
-    return this.stats;
+    const [stats] = await db.select().from(statistics);
+    return stats || undefined;
   }
   
   async updateStatistics(stats: Partial<InsertStatistics>): Promise<Statistics | undefined> {
-    if (!this.stats) return undefined;
+    const currentStats = await this.getStatistics();
     
-    this.stats = {
-      ...this.stats,
-      ...stats,
-      lastUpdated: new Date()
-    };
+    if (!currentStats) {
+      const [newStats] = await db
+        .insert(statistics)
+        .values({
+          ...stats,
+          lastUpdated: new Date().toISOString()
+        })
+        .returning();
+      return newStats;
+    }
     
-    return this.stats;
+    const [updatedStats] = await db
+      .update(statistics)
+      .set({
+        ...stats,
+        lastUpdated: new Date().toISOString()
+      })
+      .where(eq(statistics.id, currentStats.id))
+      .returning();
+    return updatedStats || undefined;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
