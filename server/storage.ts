@@ -191,10 +191,7 @@ export class DatabaseStorage implements IStorage {
   async createProject(project: InsertProject): Promise<Project> {
     const [newProject] = await db
       .insert(projects)
-      .values({
-        ...project,
-        createdAt: new Date().toISOString()
-      })
+      .values(project)
       .returning();
     return newProject;
   }
@@ -250,10 +247,7 @@ export class DatabaseStorage implements IStorage {
   async createProjectVerification(verification: InsertProjectVerification): Promise<ProjectVerification> {
     const [newVerification] = await db
       .insert(projectVerifications)
-      .values({
-        ...verification,
-        submittedDate: new Date().toISOString()
-      })
+      .values(verification)
       .returning();
     return newVerification;
   }
@@ -288,10 +282,7 @@ export class DatabaseStorage implements IStorage {
   async createCarbonCredit(credit: InsertCarbonCredit): Promise<CarbonCredit> {
     const [newCredit] = await db
       .insert(carbonCredits)
-      .values({
-        ...credit,
-        issuanceDate: new Date().toISOString()
-      })
+      .values(credit)
       .returning();
     return newCredit;
   }
@@ -320,10 +311,7 @@ export class DatabaseStorage implements IStorage {
   async createActivityLog(log: InsertActivityLog): Promise<ActivityLog> {
     const [newLog] = await db
       .insert(activityLogs)
-      .values({
-        ...log,
-        timestamp: new Date().toISOString()
-      })
+      .values(log)
       .returning();
     return newLog;
   }
@@ -349,20 +337,14 @@ export class DatabaseStorage implements IStorage {
     if (!currentStats) {
       const [newStats] = await db
         .insert(statistics)
-        .values({
-          ...stats,
-          lastUpdated: new Date().toISOString()
-        })
+        .values(stats)
         .returning();
       return newStats;
     }
     
     const [updatedStats] = await db
       .update(statistics)
-      .set({
-        ...stats,
-        lastUpdated: new Date().toISOString()
-      })
+      .set(stats)
       .where(eq(statistics.id, currentStats.id))
       .returning();
     return updatedStats || undefined;
