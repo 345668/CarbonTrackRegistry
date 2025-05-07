@@ -54,6 +54,7 @@ export default function MapComponent({
   // Fix default marker icon issue in Leaflet
   useEffect(() => {
     // Fix the icon paths
+    // @ts-ignore - Leaflet has a known issue with TypeScript definitions
     delete L.Icon.Default.prototype._getIconUrl;
     L.Icon.Default.mergeOptions({
       iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
@@ -112,14 +113,14 @@ export default function MapComponent({
       className="rounded overflow-hidden bg-gray-100"
     >
       <MapContainer 
-        center={[DEFAULT_LATITUDE, DEFAULT_LONGITUDE]} 
-        zoom={DEFAULT_ZOOM} 
         style={{ height: '100%', width: '100%' }}
         dragging={interactive}
         zoomControl={interactive}
         scrollWheelZoom={interactive}
         doubleClickZoom={interactive}
         attributionControl={true}
+        center={[DEFAULT_LATITUDE, DEFAULT_LONGITUDE] as [number, number]} 
+        zoom={DEFAULT_ZOOM}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

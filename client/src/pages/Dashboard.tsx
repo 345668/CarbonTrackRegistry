@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import DashboardStats from "@/components/dashboard/DashboardStats";
-import ProjectMapView from "@/components/dashboard/ProjectMapView";
+import ProjectLocations from "@/components/dashboard/ProjectLocations";
 import RecentActivity from "@/components/dashboard/RecentActivity";
 import RecentProjects from "@/components/dashboard/RecentProjects";
 import VerificationPipeline from "@/components/dashboard/VerificationPipeline";
