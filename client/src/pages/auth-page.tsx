@@ -74,8 +74,12 @@ export default function AuthPage() {
 
   // Handle register form submission
   function onRegisterSubmit(values: RegisterFormValues) {
-    const { confirmPassword, ...userData } = values;
-    registerMutation.mutate(userData);
+    // Extract confirmPassword and ensure organization is a string or undefined (not null)
+    const { confirmPassword, organization, ...userData } = values;
+    registerMutation.mutate({
+      ...userData,
+      organization: organization || undefined
+    });
   }
 
   return (
@@ -200,6 +204,13 @@ export default function AuthPage() {
                           </FormControl>
                           <FormMessage />
                         </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={registerForm.control}
+                      name="role"
+                      render={({ field }) => (
+                        <input type="hidden" value="user" {...field} />
                       )}
                     />
                     <FormField
