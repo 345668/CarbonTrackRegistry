@@ -26,7 +26,7 @@ export default function VerificationPipeline() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-medium text-neutral-900">Verification Pipeline</h2>
           <Link href="/verification">
-            <a className="text-sm font-medium text-primary hover:text-primary-dark">View all verifications</a>
+            <div className="text-sm font-medium text-primary hover:text-primary-dark cursor-pointer">View all verifications</div>
           </Link>
         </div>
 
@@ -45,7 +45,7 @@ export default function VerificationPipeline() {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-medium text-neutral-900">Verification Pipeline</h2>
         <Link href="/verification">
-          <a className="text-sm font-medium text-primary hover:text-primary-dark">View all verifications</a>
+          <div className="text-sm font-medium text-primary hover:text-primary-dark cursor-pointer">View all verifications</div>
         </Link>
       </div>
 

@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ActivityLog } from "@/types";
 import { formatTimeAgo, getActivityIcon } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Link } from "wouter";
 
 export default function RecentActivity() {
   const { data: activities, isLoading } = useQuery<ActivityLog[]>({
@@ -59,7 +60,9 @@ export default function RecentActivity() {
         })}
 
         <div className="pt-3">
-          <a href="/activity" className="text-sm font-medium text-primary hover:text-primary-dark">View all activity</a>
+          <Link href="/activity">
+            <div className="text-sm font-medium text-primary hover:text-primary-dark cursor-pointer">View all activity</div>
+          </Link>
         </div>
       </CardContent>
     </Card>
