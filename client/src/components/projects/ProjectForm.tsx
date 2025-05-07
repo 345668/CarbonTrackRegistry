@@ -33,11 +33,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ProjectCategory, Methodology } from "@/types";
 import { generateProjectId } from "@/lib/utils";
-import { CalendarIcon, Globe, TreePine, FlaskConical, Leaf, Calendar, Info } from "lucide-react";
+import { 
+  CalendarIcon, 
+  Globe, 
+  TreePine, 
+  FlaskConical, 
+  Leaf, 
+  Calendar, 
+  Info, 
+  Home, 
+  Car, 
+  Building, 
+  LightbulbIcon
+} from "lucide-react";
 
 const projectFormSchema = z.object({
   name: z.string().min(3, "Project name must be at least 3 characters"),
@@ -187,11 +206,31 @@ export default function ProjectForm() {
                             <SelectValue placeholder="Country" />
                           </SelectTrigger>
                           <SelectContent>
+                            {/* Americas */}
                             <SelectItem value="USA">USA</SelectItem>
-                            <SelectItem value="KEN">Kenya</SelectItem>
+                            <SelectItem value="CAN">Canada</SelectItem>
                             <SelectItem value="BRA">Brazil</SelectItem>
-                            <SelectItem value="IND">India</SelectItem>
                             <SelectItem value="MEX">Mexico</SelectItem>
+                            
+                            {/* Europe */}
+                            <SelectItem value="DEU">Germany</SelectItem>
+                            <SelectItem value="FRA">France</SelectItem>
+                            <SelectItem value="GBR">UK</SelectItem>
+                            <SelectItem value="ESP">Spain</SelectItem>
+                            <SelectItem value="ITA">Italy</SelectItem>
+                            <SelectItem value="NLD">Netherlands</SelectItem>
+                            <SelectItem value="SWE">Sweden</SelectItem>
+                            <SelectItem value="POL">Poland</SelectItem>
+                            <SelectItem value="DNK">Denmark</SelectItem>
+                            <SelectItem value="CHE">Switzerland</SelectItem>
+                            
+                            {/* Asia & Africa */}
+                            <SelectItem value="IND">India</SelectItem>
+                            <SelectItem value="KEN">Kenya</SelectItem>
+                            <SelectItem value="ZAF">South Africa</SelectItem>
+                            <SelectItem value="GHA">Ghana</SelectItem>
+                            <SelectItem value="JPN">Japan</SelectItem>
+                            <SelectItem value="SGP">Singapore</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormControl>
@@ -254,7 +293,16 @@ export default function ProjectForm() {
                     <FormItem>
                       <FormLabel className="flex items-center gap-1.5">
                         <span>Project Category</span>
-                        <TreePine className="h-3.5 w-3.5 text-muted-foreground opacity-70" />
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-3.5 w-3.5 text-muted-foreground opacity-70 cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <p>The category determines which methodologies are available and how your project's impact will be measured.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </FormLabel>
                       <Select 
                         onValueChange={field.onChange} 
@@ -266,12 +314,32 @@ export default function ProjectForm() {
                             <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
-                          {categories?.map((category) => (
-                            <SelectItem key={category.id} value={category.name}>
-                              {category.name}
-                            </SelectItem>
-                          ))}
+                        <SelectContent className="max-h-80">
+                          <div className="grid grid-cols-1 gap-1 p-1">
+                            {categories?.map((category) => {
+                              // Assign an appropriate icon based on category
+                              let CategoryIcon = TreePine;
+                              
+                              if (category.name === "Renewable Energy") {
+                                CategoryIcon = LightbulbIcon;
+                              } else if (category.name === "Home Emissions") {
+                                CategoryIcon = Home;
+                              } else if (category.name === "Building Emissions") {
+                                CategoryIcon = Building;
+                              } else if (category.name === "Transportation") {
+                                CategoryIcon = Car;
+                              }
+                              
+                              return (
+                                <SelectItem key={category.id} value={category.name} className="flex items-center">
+                                  <div className="flex items-center gap-2">
+                                    <CategoryIcon className="h-4 w-4 text-muted-foreground" />
+                                    <span>{category.name}</span>
+                                  </div>
+                                </SelectItem>
+                              );
+                            })}
+                          </div>
                         </SelectContent>
                       </Select>
                       <FormDescription>
@@ -289,7 +357,16 @@ export default function ProjectForm() {
                     <FormItem>
                       <FormLabel className="flex items-center gap-1.5">
                         <span>Methodology</span>
-                        <FlaskConical className="h-3.5 w-3.5 text-muted-foreground opacity-70" />
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <FlaskConical className="h-3.5 w-3.5 text-muted-foreground opacity-70 cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <p>The methodology defines how carbon reductions will be calculated and verified for your project.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </FormLabel>
                       <Select 
                         onValueChange={field.onChange} 
@@ -301,18 +378,41 @@ export default function ProjectForm() {
                             <SelectValue placeholder="Select a methodology" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
-                          {methodologies
-                            ?.filter(m => form.watch("category") ? m.category === form.watch("category") : true)
-                            .map((methodology) => (
-                              <SelectItem key={methodology.id} value={methodology.name}>
-                                {methodology.name}
-                              </SelectItem>
-                            ))}
+                        <SelectContent className="max-h-80">
+                          {!form.watch("category") ? (
+                            <div className="p-2 text-center text-sm text-muted-foreground">
+                              Please select a project category first
+                            </div>
+                          ) : methodologies?.filter(m => m.category === form.watch("category")).length === 0 ? (
+                            <div className="p-2 text-center text-sm text-muted-foreground">
+                              No methodologies available for this category
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-1 gap-1 p-1">
+                              {methodologies
+                                ?.filter(m => m.category === form.watch("category"))
+                                .map((methodology) => (
+                                  <SelectItem key={methodology.id} value={methodology.name} className="py-2">
+                                    <div className="flex flex-col">
+                                      <span className="font-medium">{methodology.name}</span>
+                                      <span className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{methodology.description}</span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                            </div>
+                          )}
                         </SelectContent>
                       </Select>
                       <FormDescription>
-                        Choose the appropriate methodology for measuring carbon reductions
+                        {form.watch("category") === "Home Emissions" ? (
+                          <>Calculate carbon reductions for household energy savings and improvements</>
+                        ) : form.watch("category") === "Building Emissions" ? (
+                          <>Measure carbon reductions in commercial and residential buildings</>
+                        ) : form.watch("category") === "Transportation" ? (
+                          <>Quantify emissions reductions from sustainable transportation</>
+                        ) : (
+                          <>Choose the appropriate methodology for measuring carbon reductions</>
+                        )}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
