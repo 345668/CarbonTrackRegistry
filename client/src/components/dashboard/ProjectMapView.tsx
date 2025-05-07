@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Project, ProjectCategory } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import MapComponent from "@/components/map/MapComponent";
 
 export default function ProjectMapView() {
   const { data: projects, isLoading: isLoadingProjects } = useQuery<Project[]>({
@@ -25,12 +26,12 @@ export default function ProjectMapView() {
         <CardTitle className="text-lg font-medium leading-6 text-neutral-900">Project Locations</CardTitle>
       </CardHeader>
       <CardContent className="p-4">
-        <div className="h-64 bg-gray-100 rounded flex items-center justify-center">
-          <div className="text-center p-4">
-            <span className="material-icons text-5xl text-gray-400 mb-2">map</span>
-            <p className="text-gray-500">Interactive map will be displayed here</p>
-            <p className="text-sm text-gray-400 mt-1">(Map visualization requires additional libraries)</p>
-          </div>
+        <div className="h-64 overflow-hidden rounded">
+          <MapComponent 
+            projects={projects || []} 
+            height="100%" 
+            showPopup={true}
+          />
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
           {categories?.map((category) => (

@@ -32,6 +32,8 @@ export interface Project {
   developer: string;
   location: string;
   coordinates?: { type: string; coordinates: number[] };
+  longitude?: string;
+  latitude?: string;
   startDate: string;
   endDate: string;
   status: "draft" | "registered" | "verified" | "rejected";

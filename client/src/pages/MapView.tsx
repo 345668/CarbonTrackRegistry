@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Project, ProjectCategory } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCategoryColor } from "@/lib/utils";
+import MapComponent from "@/components/map/MapComponent";
 
 export default function MapView() {
   const { data: projects, isLoading: isLoadingProjects } = useQuery<Project[]>({
@@ -50,12 +51,12 @@ export default function MapView() {
             {isLoading ? (
               <Skeleton className="h-[400px] w-full rounded" />
             ) : (
-              <div className="h-[400px] bg-neutral-50 rounded flex items-center justify-center">
-                <div className="text-center p-4">
-                  <span className="material-icons text-5xl text-gray-400 mb-2">map</span>
-                  <p className="text-gray-500">Interactive map will be displayed here</p>
-                  <p className="text-sm text-gray-400 mt-1">(Map visualization requires additional libraries)</p>
-                </div>
+              <div className="h-[400px] overflow-hidden rounded">
+                <MapComponent 
+                  projects={projects || []} 
+                  height="100%" 
+                  showPopup={true}
+                />
               </div>
             )}
 

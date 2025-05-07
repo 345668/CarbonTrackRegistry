@@ -72,6 +72,8 @@ export const projects = pgTable("projects", {
   developer: text("developer").notNull(), // Reference to user who created the project
   location: text("location").notNull(),
   coordinates: json("coordinates"), // GeoJSON format
+  longitude: text("longitude"), // For map visualization
+  latitude: text("latitude"), // For map visualization
   startDate: text("start_date").notNull(),
   endDate: text("end_date").notNull(),
   status: text("status").notNull().default("draft"), // draft, registered, verified, rejected
@@ -89,6 +91,8 @@ export const insertProjectSchema = createInsertSchema(projects).pick({
   developer: true,
   location: true,
   coordinates: true,
+  longitude: true,
+  latitude: true,
   startDate: true,
   endDate: true,
   status: true,
