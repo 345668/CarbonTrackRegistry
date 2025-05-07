@@ -20,7 +20,9 @@ export default function RecentProjects() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-medium text-neutral-900">Recent Projects</h2>
           <Link href="/projects/new">
-            <Button variant="default" size="sm">Create a new project</Button>
+            <div>
+              <Button variant="default" size="sm">Create a new project</Button>
+            </div>
           </Link>
         </div>
         <div className="bg-white rounded-lg p-8 text-center">
@@ -28,7 +30,9 @@ export default function RecentProjects() {
           <h3 className="text-lg font-medium text-neutral-900 mb-2">No projects yet</h3>
           <p className="text-neutral-500 mb-4">Start by creating your first carbon project</p>
           <Link href="/projects/new">
-            <Button>Create Project</Button>
+            <div>
+              <Button>Create Project</Button>
+            </div>
           </Link>
         </div>
       </div>
@@ -47,7 +51,7 @@ export default function RecentProjects() {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-medium text-neutral-900">Recent Projects</h2>
         <Link href="/projects">
-          <a className="text-sm font-medium text-primary hover:text-primary-dark">View all projects</a>
+          <div className="text-sm font-medium text-primary hover:text-primary-dark cursor-pointer">View all projects</div>
         </Link>
       </div>
 

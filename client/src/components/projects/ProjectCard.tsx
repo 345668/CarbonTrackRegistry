@@ -12,7 +12,7 @@ interface ProjectCardProps {
 export default function ProjectCard({ project, showFooter = true }: ProjectCardProps) {
   return (
     <Link href={`/projects/${project.projectId}`}>
-      <a className="block">
+      <div className="block cursor-pointer">
         <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-full flex flex-col">
           <div className="relative h-40">
             {project.imageUrl ? (
@@ -58,7 +58,7 @@ export default function ProjectCard({ project, showFooter = true }: ProjectCardP
             </CardFooter>
           )}
         </Card>
-      </a>
+      </div>
     </Link>
   );
 }
