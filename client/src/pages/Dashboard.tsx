@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import DashboardStats from "@/components/dashboard/DashboardStats";
-import ProjectLocations from "@/components/dashboard/ProjectLocations";
+import ProjectMapView from "@/components/dashboard/ProjectMapView";
 import RecentActivity from "@/components/dashboard/RecentActivity";
 import RecentProjects from "@/components/dashboard/RecentProjects";
 import VerificationPipeline from "@/components/dashboard/VerificationPipeline";
@@ -32,7 +32,7 @@ export default function Dashboard() {
 
       {/* Project Map and Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <ProjectLocations />
+        <ProjectMapView />
         <RecentActivity />
       </div>
 
