@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { insertUserSchema } from "@shared/schema";
 import { useAuth } from "@/hooks/use-auth";
-import { Check, Leaf, ShieldCheck, BarChart3 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,22 +81,19 @@ export default function AuthPage() {
   return (
     <div className="flex min-h-screen">
       {/* Left Column - Auth Forms */}
-      <div className="flex flex-1 items-center justify-center p-4 sm:p-8 bg-white">
-        <Card className="w-full max-w-md border-0 shadow-none card-elevated">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center mb-2 gradient-text">Carbon Registry Platform</CardTitle>
-            <CardDescription className="text-center mb-4">
-              Login or create an account to manage carbon projects
-            </CardDescription>
-          </CardHeader>
+      <div className="flex flex-1 items-center justify-center p-4 sm:p-8">
+        <Card className="w-full max-w-md">
+          <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab}>
+            <CardHeader>
+              <CardTitle className="text-2xl text-center mb-2">Carbon Registry Platform</CardTitle>
+              <CardDescription className="text-center mb-4">Login or create an account to manage carbon projects</CardDescription>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="login">Login</TabsTrigger>
+                <TabsTrigger value="register">Register</TabsTrigger>
+              </TabsList>
+            </CardHeader>
 
-          <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab} className="tabs-auth">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login" className="text-base font-medium">Login</TabsTrigger>
-              <TabsTrigger value="register" className="text-base font-medium">Register</TabsTrigger>
-            </TabsList>
-
-            <CardContent className="px-0">
+            <CardContent>
               <TabsContent value="login">
                 <Form {...loginForm}>
                   <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
@@ -106,13 +102,9 @@ export default function AuthPage() {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium">Username</FormLabel>
+                          <FormLabel>Username</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="Enter your username" 
-                              className="input-focus-ring" 
-                              {...field} 
-                            />
+                            <Input placeholder="Enter your username" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -123,14 +115,9 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium">Password</FormLabel>
+                          <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <Input 
-                              type="password" 
-                              placeholder="Enter your password" 
-                              className="input-focus-ring" 
-                              {...field} 
-                            />
+                            <Input type="password" placeholder="Enter your password" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -138,130 +125,91 @@ export default function AuthPage() {
                     />
                     <Button
                       type="submit"
-                      className="w-full mt-6 text-base font-medium btn-primary-gradient"
+                      className="w-full"
                       disabled={loginMutation.isPending}
                     >
                       {loginMutation.isPending ? "Logging in..." : "Login"}
                     </Button>
                   </form>
                 </Form>
-                <div className="mt-4 text-center text-sm text-muted-foreground">
-                  <p>
-                    Don't have an account?{" "}
-                    <Button variant="link" className="p-0 font-medium text-primary" onClick={() => setActiveTab("register")}>
-                      Register
-                    </Button>
-                  </p>
-                </div>
               </TabsContent>
 
               <TabsContent value="register">
                 <Form {...registerForm}>
                   <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={registerForm.control}
-                        name="username"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-sm font-medium">Username</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="Choose a username" 
-                                className="input-focus-ring" 
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={registerForm.control}
-                        name="fullName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-sm font-medium">Full Name</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="Enter your full name" 
-                                className="input-focus-ring" 
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
                     <FormField
                       control={registerForm.control}
-                      name="email"
+                      name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium">Email</FormLabel>
+                          <FormLabel>Username</FormLabel>
                           <FormControl>
-                            <Input 
-                              type="email" 
-                              placeholder="Enter your email" 
-                              className="input-focus-ring" 
-                              {...field} 
-                            />
+                            <Input placeholder="Choose a username" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={registerForm.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-sm font-medium">Password</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="password" 
-                                placeholder="Create a password" 
-                                className="input-focus-ring" 
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={registerForm.control}
-                        name="confirmPassword"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-sm font-medium">Confirm Password</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="password" 
-                                placeholder="Confirm your password" 
-                                className="input-focus-ring" 
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                    <FormField
+                      control={registerForm.control}
+                      name="fullName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter your full name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={registerForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="Enter your email" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={registerForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Password</FormLabel>
+                          <FormControl>
+                            <Input type="password" placeholder="Create a password" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={registerForm.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Confirm Password</FormLabel>
+                          <FormControl>
+                            <Input type="password" placeholder="Confirm your password" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <FormField
                       control={registerForm.control}
                       name="organization"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium">Organization (Optional)</FormLabel>
+                          <FormLabel>Organization (Optional)</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="Enter your organization" 
-                              className="input-focus-ring" 
-                              {...field} 
-                            />
+                            <Input placeholder="Enter your organization" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -269,23 +217,33 @@ export default function AuthPage() {
                     />
                     <Button
                       type="submit"
-                      className="w-full mt-6 text-base font-medium btn-primary-gradient"
+                      className="w-full"
                       disabled={registerMutation.isPending}
                     >
                       {registerMutation.isPending ? "Creating account..." : "Create Account"}
                     </Button>
                   </form>
                 </Form>
-                <div className="mt-4 text-center text-sm text-muted-foreground">
-                  <p>
-                    Already have an account?{" "}
-                    <Button variant="link" className="p-0 font-medium text-primary" onClick={() => setActiveTab("login")}>
-                      Login
-                    </Button>
-                  </p>
-                </div>
               </TabsContent>
             </CardContent>
+
+            <CardFooter className="flex justify-center text-sm text-muted-foreground">
+              {activeTab === "login" ? (
+                <p>
+                  Don't have an account?{" "}
+                  <Button variant="link" className="p-0" onClick={() => setActiveTab("register")}>
+                    Register
+                  </Button>
+                </p>
+              ) : (
+                <p>
+                  Already have an account?{" "}
+                  <Button variant="link" className="p-0" onClick={() => setActiveTab("login")}>
+                    Login
+                  </Button>
+                </p>
+              )}
+            </CardFooter>
           </Tabs>
         </Card>
       </div>
@@ -301,30 +259,38 @@ export default function AuthPage() {
             and credits. Help combat climate change by supporting sustainable initiatives and
             monitoring their impact.
           </p>
-          <div className="space-y-6">
-            <div className="flex items-start space-x-3">
-              <div className="bg-white text-primary p-1.5 rounded-full mt-0.5 flex items-center justify-center">
-                <Leaf className="h-4 w-4" />
+          <div className="space-y-4">
+            <div className="flex items-start space-x-2">
+              <div className="bg-white text-primary p-1 rounded-full mt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
               </div>
-              <p className="text-base">Register and monitor carbon offset projects</p>
+              <p className="text-sm">Register and monitor carbon offset projects</p>
             </div>
-            <div className="flex items-start space-x-3">
-              <div className="bg-white text-primary p-1.5 rounded-full mt-0.5 flex items-center justify-center">
-                <ShieldCheck className="h-4 w-4" />
+            <div className="flex items-start space-x-2">
+              <div className="bg-white text-primary p-1 rounded-full mt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
               </div>
-              <p className="text-base">Track verification stages and project statuses</p>
+              <p className="text-sm">Track verification stages and project statuses</p>
             </div>
-            <div className="flex items-start space-x-3">
-              <div className="bg-white text-primary p-1.5 rounded-full mt-0.5 flex items-center justify-center">
-                <BarChart3 className="h-4 w-4" />
+            <div className="flex items-start space-x-2">
+              <div className="bg-white text-primary p-1 rounded-full mt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
               </div>
-              <p className="text-base">Manage and transfer carbon credits</p>
+              <p className="text-sm">Manage and transfer carbon credits</p>
             </div>
-            <div className="flex items-start space-x-3">
-              <div className="bg-white text-primary p-1.5 rounded-full mt-0.5 flex items-center justify-center">
-                <Check className="h-4 w-4" />
+            <div className="flex items-start space-x-2">
+              <div className="bg-white text-primary p-1 rounded-full mt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
               </div>
-              <p className="text-base">Support sustainable development goals</p>
+              <p className="text-sm">Support sustainable development goals</p>
             </div>
           </div>
         </div>
