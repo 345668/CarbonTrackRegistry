@@ -39,9 +39,9 @@ export default function Sidebar() {
                 key={item.href} 
                 href={item.href}
               >
-                <a 
+                <div 
                   className={cn(
-                    "flex items-center px-3 py-2 text-sm font-medium rounded-md",
+                    "flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer",
                     isActive 
                       ? "bg-primary bg-opacity-10 text-primary border-l-3 border-primary" 
                       : "text-neutral-700 hover:bg-neutral-50"
@@ -54,7 +54,7 @@ export default function Sidebar() {
                     {item.icon}
                   </span>
                   {item.title}
-                </a>
+                </div>
               </Link>
             );
           })}
