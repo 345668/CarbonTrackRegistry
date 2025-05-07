@@ -84,7 +84,7 @@ export default function Methodologies() {
       methodology.name.toLowerCase().includes(search.toLowerCase()) ||
       (methodology.description && methodology.description.toLowerCase().includes(search.toLowerCase()));
     
-    const matchesCategory = categoryFilter === "" || methodology.category === categoryFilter;
+    const matchesCategory = categoryFilter === "all" || methodology.category === categoryFilter;
     
     return matchesSearch && matchesCategory;
   });

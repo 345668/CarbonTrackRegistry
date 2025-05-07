@@ -44,8 +44,8 @@ export default function Verification() {
   
   // Filter verifications based on filters
   const filteredVerifications = verifications?.filter(verification => {
-    const matchesStatus = statusFilter === "" || verification.status === statusFilter;
-    const matchesStage = stageFilter === "" || verification.currentStage === parseInt(stageFilter);
+    const matchesStatus = statusFilter === "all" || verification.status === statusFilter;
+    const matchesStage = stageFilter === "all" || verification.currentStage === parseInt(stageFilter);
     
     return matchesStatus && matchesStage;
   });

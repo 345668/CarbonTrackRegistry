@@ -46,7 +46,7 @@ export default function CarbonCredits() {
       credit.serialNumber.toLowerCase().includes(search.toLowerCase()) ||
       credit.projectId.toLowerCase().includes(search.toLowerCase());
     
-    const matchesStatus = statusFilter === "" || credit.status === statusFilter;
+    const matchesStatus = statusFilter === "all" || credit.status === statusFilter;
     
     return matchesSearch && matchesStatus;
   });

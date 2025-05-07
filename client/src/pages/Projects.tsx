@@ -38,7 +38,7 @@ export default function Projects() {
       project.projectId.toLowerCase().includes(search.toLowerCase());
     
     const matchesStatus = statusFilter === "all" || project.status === statusFilter;
-    const matchesCategory = categoryFilter === "" || project.category === categoryFilter;
+    const matchesCategory = categoryFilter === "all" || project.category === categoryFilter;
     
     return matchesSearch && matchesStatus && matchesCategory;
   });

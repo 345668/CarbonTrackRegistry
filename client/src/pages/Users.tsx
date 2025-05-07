@@ -81,7 +81,7 @@ export default function Users() {
       user.email.toLowerCase().includes(search.toLowerCase()) ||
       (user.organization && user.organization.toLowerCase().includes(search.toLowerCase()));
     
-    const matchesRole = roleFilter === "" || user.role === roleFilter;
+    const matchesRole = roleFilter === "all" || user.role === roleFilter;
     
     return matchesSearch && matchesRole;
   });
