@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { generateCertificate, type ProjectCertificateData, type CreditCertificateData } from "./utils/certificate-generator";
+import { blockchainService } from "./utils/blockchain";
 import { 
   insertUserSchema,
   insertProjectCategorySchema,
@@ -16,7 +17,9 @@ import {
   insertActivityLogSchema,
   insertStatisticsSchema,
   insertCorrespondingAdjustmentSchema,
-  type InsertCarbonCredit
+  insertBlockchainConfigSchema,
+  type InsertCarbonCredit,
+  type InsertBlockchainConfig
 } from "@shared/schema";
 import { z } from "zod";
 

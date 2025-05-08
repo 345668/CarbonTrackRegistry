@@ -554,6 +554,78 @@ export class DatabaseStorage implements IStorage {
       return await db.select().from(correspondingAdjustments).where(eq(correspondingAdjustments.recipientCountry, country));
     }
   }
+
+  // Blockchain Record operations
+  async getBlockchainRecord(id: number): Promise<BlockchainRecord | undefined> {
+    const [record] = await db.select().from(blockchainRecords).where(eq(blockchainRecords.id, id));
+    return record || undefined;
+  }
+
+  async getBlockchainRecordByTxHash(txHash: string): Promise<BlockchainRecord | undefined> {
+    const [record] = await db.select().from(blockchainRecords).where(eq(blockchainRecords.txHash, txHash));
+    return record || undefined;
+  }
+
+  async getBlockchainRecordsByEntity(entityType: string, entityId: string): Promise<BlockchainRecord[]> {
+    return await db.select().from(blockchainRecords).where(
+      and(
+        eq(blockchainRecords.entityType, entityType),
+        eq(blockchainRecords.entityId, entityId)
+      )
+    ).orderBy(desc(blockchainRecords.timestamp));
+  }
+
+  async createBlockchainRecord(record: InsertBlockchainRecord): Promise<BlockchainRecord> {
+    const [newRecord] = await db
+      .insert(blockchainRecords)
+      .values(record)
+      .returning();
+    return newRecord;
+  }
+
+  async listBlockchainRecords(limit?: number): Promise<BlockchainRecord[]> {
+    if (limit) {
+      return await db.select().from(blockchainRecords)
+        .orderBy(desc(blockchainRecords.timestamp))
+        .limit(limit);
+    }
+    return await db.select().from(blockchainRecords)
+      .orderBy(desc(blockchainRecords.timestamp));
+  }
+
+  // Blockchain Config operations
+  async getBlockchainConfig(): Promise<BlockchainConfig | undefined> {
+    const [config] = await db.select().from(blockchainConfig);
+    return config || undefined;
+  }
+
+  async updateBlockchainConfig(config: Partial<InsertBlockchainConfig>): Promise<BlockchainConfig> {
+    // Check if a config already exists
+    const existingConfig = await this.getBlockchainConfig();
+
+    if (existingConfig) {
+      // Update existing config
+      const [updatedConfig] = await db
+        .update(blockchainConfig)
+        .set({
+          ...config,
+          lastUpdated: new Date()
+        })
+        .where(eq(blockchainConfig.id, existingConfig.id))
+        .returning();
+      return updatedConfig;
+    } else {
+      // Create new config if none exists
+      const [newConfig] = await db
+        .insert(blockchainConfig)
+        .values({
+          ...config,
+          enabled: config.enabled ?? false,
+        })
+        .returning();
+      return newConfig;
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
