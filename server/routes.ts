@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
+import { generateProjectCertificate, generateCreditCertificate } from "./utils/certificate-generator";
 import { 
   insertUserSchema,
   insertProjectCategorySchema,
@@ -757,6 +758,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Certificate Generation API
+  app.get("/api/projects/:projectId/certificate", async (req, res) => {
+    try {
+      const projectId = req.params.projectId;
+      const project = await storage.getProjectByProjectId(projectId);
+      
+      if (!project) {
+        return res.status(404).json({ error: "Project not found" });
+      }
+      
+      // Check if project is verified
+      if (project.status !== "verified") {
+        return res.status(400).json({ error: "Only verified projects can generate certificates" });
+      }
+      
+      // Get verification
+      const verification = await storage.getProjectVerificationByProjectId(projectId);
+      if (!verification) {
+        return res.status(404).json({ error: "Verification not found" });
+      }
+      
+      // Generate the certificate
+      const pdfBuffer = await generateProjectCertificate(project, verification.id);
+      
+      // Create activity log
+      await storage.createActivityLog({
+        action: "certificate_generated",
+        description: `Verification certificate generated for project ${projectId}`,
+        entityType: "project",
+        entityId: projectId,
+        userId: req.user?.id || 1
+      });
+      
+      // Set response headers for PDF download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=project-certificate-${projectId}.pdf`);
+      res.setHeader('Content-Length', pdfBuffer.length);
+      
+      // Send the PDF buffer
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error("Error generating project certificate:", error);
+      res.status(500).json({ error: "Failed to generate certificate" });
+    }
+  });
+  
+  app.get("/api/credits/:serialNumber/certificate", async (req, res) => {
+    try {
+      const serialNumber = req.params.serialNumber;
+      const credit = await storage.getCarbonCreditBySerialNumber(serialNumber);
+      
+      if (!credit) {
+        return res.status(404).json({ error: "Carbon credit not found" });
+      }
+      
+      // Generate the certificate
+      const pdfBuffer = await generateCreditCertificate(credit);
+      
+      // Create activity log
+      await storage.createActivityLog({
+        action: "certificate_generated",
+        description: `Certificate generated for carbon credit ${serialNumber}`,
+        entityType: "credit",
+        entityId: serialNumber,
+        userId: req.user?.id || 1
+      });
+      
+      // Set response headers for PDF download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=credit-certificate-${serialNumber}.pdf`);
+      res.setHeader('Content-Length', pdfBuffer.length);
+      
+      // Send the PDF buffer
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error("Error generating credit certificate:", error);
+      res.status(500).json({ error: "Failed to generate certificate" });
+    }
+  });
+  
+  // Verify certificates API endpoint
+  app.get("/api/verify-certificate", async (req, res) => {
+    try {
+      const { type, id, verificationId } = req.query;
+      
+      if (!type || !id) {
+        return res.status(400).json({ error: "Missing certificate parameters" });
+      }
+      
+      if (type === 'project') {
+        if (!verificationId) {
+          return res.status(400).json({ error: "Missing verification ID" });
+        }
+        
+        const project = await storage.getProjectByProjectId(id as string);
+        if (!project) {
+          return res.status(404).json({ error: "Project not found" });
+        }
+        
+        const verification = await storage.getProjectVerification(parseInt(verificationId as string));
+        if (!verification || verification.projectId !== id) {
+          return res.status(404).json({ error: "Verification not found" });
+        }
+        
+        return res.json({
+          verified: true,
+          type: 'project',
+          project,
+          verification
+        });
+      } else if (type === 'credit') {
+        const credit = await storage.getCarbonCreditBySerialNumber(id as string);
+        if (!credit) {
+          return res.status(404).json({ error: "Carbon credit not found" });
+        }
+        
+        return res.json({
+          verified: true,
+          type: 'credit',
+          credit
+        });
+      } else {
+        return res.status(400).json({ error: "Invalid certificate type" });
+      }
+    } catch (error) {
+      console.error("Error verifying certificate:", error);
+      res.status(500).json({ error: "Failed to verify certificate" });
+    }
+  });
+
   // Corresponding Adjustments API (Paris Agreement Article 6)
   app.get("/api/adjustments", async (req, res) => {
     try {
