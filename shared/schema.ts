@@ -221,7 +221,12 @@ export const carbonCredits = pgTable("carbon_credits", {
   status: text("status").notNull().default("available"), // available, retired, transferred
   issuanceDate: timestamp("issuance_date").notNull().defaultNow(),
   retirementDate: timestamp("retirement_date"),
+  transferDate: timestamp("transfer_date"), // Date when the credit was transferred
+  transferRecipient: text("transfer_recipient"), // Username of the recipient if transferred
+  transferPurpose: text("transfer_purpose"), // Purpose of the transfer
   owner: text("owner").notNull(), // Reference to user
+  retirementPurpose: text("retirement_purpose"), // Purpose of retirement (e.g., "Corporate offsetting", "Compliance")
+  retirementBeneficiary: text("retirement_beneficiary"), // Entity on whose behalf the credits were retired
 });
 
 export const insertCarbonCreditSchema = createInsertSchema(carbonCredits).pick({
@@ -231,6 +236,10 @@ export const insertCarbonCreditSchema = createInsertSchema(carbonCredits).pick({
   quantity: true,
   status: true,
   owner: true,
+  transferRecipient: true,
+  transferPurpose: true,
+  retirementPurpose: true,
+  retirementBeneficiary: true,
 });
 
 export type InsertCarbonCredit = z.infer<typeof insertCarbonCreditSchema>;

@@ -585,17 +585,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedCredit = await storage.updateCarbonCredit(id, updateData);
       
       // Create activity log
-      const action = updateData.status === "retired" ? "credit_retired" : "credit_updated";
-      const description = updateData.status === "retired" 
-        ? `${credit.quantity} credits retired for project ${credit.projectId}`
-        : `Credit ${credit.serialNumber} updated`;
+      const action = updateData.status === "retired" ? "credit_retired" : 
+                    updateData.status === "transferred" ? "credit_transferred" : "credit_updated";
+      
+      let description = `Credit ${credit.serialNumber} updated`;
+      
+      if (updateData.status === "retired") {
+        description = `${credit.quantity} credits retired for project ${credit.projectId}`;
+        if (updateData.retirementPurpose) {
+          description += ` for ${updateData.retirementPurpose}`;
+        }
+        if (updateData.retirementBeneficiary) {
+          description += ` on behalf of ${updateData.retirementBeneficiary}`;
+        }
+      } else if (updateData.status === "transferred") {
+        description = `${credit.quantity} credits transferred from ${credit.owner} to ${updateData.transferRecipient}`;
+        if (updateData.transferPurpose) {
+          description += ` for ${updateData.transferPurpose}`;
+        }
+      }
       
       await storage.createActivityLog({
         action,
         description,
         entityType: "credit",
         entityId: credit.serialNumber,
-        userId: 1 // Assuming admin user
+        userId: req.user?.id || 1 // Use authenticated user if available, fallback to admin
       });
       
       res.json(updatedCredit);
@@ -604,6 +619,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: error.errors });
       }
       res.status(500).json({ error: "Failed to update carbon credit" });
+    }
+  });
+  
+  // Specific endpoint for transferring credits
+  app.post("/api/credits/:id/transfer", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const credit = await storage.getCarbonCredit(id);
+      
+      if (!credit) {
+        return res.status(404).json({ error: "Carbon credit not found" });
+      }
+      
+      if (credit.status !== "available") {
+        return res.status(400).json({ 
+          error: "Only available credits can be transferred. This credit has already been retired or transferred." 
+        });
+      }
+      
+      // Validate transfer data
+      const transferSchema = z.object({
+        recipient: z.string().min(1, "Recipient is required"),
+        purpose: z.string().optional(),
+      });
+      
+      const { recipient, purpose } = transferSchema.parse(req.body);
+      
+      // Check if recipient exists
+      const recipientUser = await storage.getUserByUsername(recipient);
+      if (!recipientUser) {
+        return res.status(404).json({ error: "Recipient user not found" });
+      }
+      
+      // Update the credit
+      const updatedCredit = await storage.updateCarbonCredit(id, {
+        status: "transferred",
+        transferRecipient: recipient,
+        transferPurpose: purpose,
+        transferDate: new Date().toISOString(),
+      });
+      
+      // Log the transfer
+      await storage.createActivityLog({
+        action: "credit_transferred",
+        description: `${credit.quantity} credits transferred from ${credit.owner} to ${recipient}${purpose ? ` for ${purpose}` : ''}`,
+        entityType: "credit",
+        entityId: credit.serialNumber,
+        userId: req.user?.id || 1
+      });
+      
+      res.json(updatedCredit);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to transfer carbon credit" });
+    }
+  });
+  
+  // Specific endpoint for retiring credits
+  app.post("/api/credits/:id/retire", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const credit = await storage.getCarbonCredit(id);
+      
+      if (!credit) {
+        return res.status(404).json({ error: "Carbon credit not found" });
+      }
+      
+      if (credit.status !== "available") {
+        return res.status(400).json({ 
+          error: "Only available credits can be retired. This credit has already been retired or transferred." 
+        });
+      }
+      
+      // Validate retirement data
+      const retirementSchema = z.object({
+        purpose: z.string().optional(),
+        beneficiary: z.string().optional(),
+      });
+      
+      const { purpose, beneficiary } = retirementSchema.parse(req.body);
+      
+      // Update the credit
+      const updatedCredit = await storage.updateCarbonCredit(id, {
+        status: "retired",
+        retirementPurpose: purpose,
+        retirementBeneficiary: beneficiary,
+        retirementDate: new Date().toISOString(),
+      });
+      
+      // Log the retirement
+      let description = `${credit.quantity} credits retired for project ${credit.projectId}`;
+      if (purpose) {
+        description += ` for ${purpose}`;
+      }
+      if (beneficiary) {
+        description += ` on behalf of ${beneficiary}`;
+      }
+      
+      await storage.createActivityLog({
+        action: "credit_retired",
+        description,
+        entityType: "credit",
+        entityId: credit.serialNumber,
+        userId: req.user?.id || 1
+      });
+      
+      res.json(updatedCredit);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to retire carbon credit" });
     }
   });
 
