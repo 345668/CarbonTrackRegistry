@@ -14,7 +14,8 @@ import {
   insertCarbonCreditSchema,
   insertActivityLogSchema,
   insertStatisticsSchema,
-  insertCorrespondingAdjustmentSchema
+  insertCorrespondingAdjustmentSchema,
+  type InsertCarbonCredit
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -808,7 +809,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/adjustments", async (req, res) => {
     try {
-      const adjustmentData = insertCorrespondingAdjustmentSchema.parse(req.body);
+      // Handle date conversion
+      const { adjustmentDate, ...otherData } = req.body;
+      
+      // Create insertion data with proper date format
+      const insertData: any = { ...otherData };
+      if (adjustmentDate) {
+        insertData.adjustmentDate = new Date(adjustmentDate);
+      }
+      
+      // Validate the data
+      const adjustmentData = insertCorrespondingAdjustmentSchema.parse(insertData);
       const adjustment = await storage.createCorrespondingAdjustment(adjustmentData);
       
       // Log the activity
@@ -838,8 +849,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Corresponding adjustment not found" });
       }
       
+      // Handle date conversion
+      const { adjustmentDate, ...otherData } = req.body;
+      
+      // Create update data with proper date format
+      const patchData: any = { ...otherData };
+      if (adjustmentDate) {
+        patchData.adjustmentDate = new Date(adjustmentDate);
+      }
+      
+      // Validate the data
       const updateSchema = insertCorrespondingAdjustmentSchema.partial();
-      const updateData = updateSchema.parse(req.body);
+      const updateData = updateSchema.parse(patchData);
       
       const updatedAdjustment = await storage.updateCorrespondingAdjustment(id, updateData);
       
@@ -871,22 +892,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Carbon credit not found" });
       }
       
-      // Validate Paris Agreement data
-      const parisComplianceSchema = z.object({
-        parisAgreementEligible: z.boolean().optional(),
-        hostCountry: z.string().optional(),
-        correspondingAdjustmentStatus: z.enum(["pending", "approved", "rejected"]).optional(),
-        correspondingAdjustmentDetails: z.string().optional(),
-        internationalTransfer: z.boolean().optional(),
-        mitigationOutcome: z.string().optional(),
-        authorizationReference: z.string().optional(),
-        authorizationDate: z.string().optional(),
-      });
+      // Parse and transform data for the database
+      const { authorizationDate, ...otherData } = req.body;
       
-      const complianceData = parisComplianceSchema.parse(req.body);
+      // Create update data object
+      const updateData: Partial<InsertCarbonCredit> = {
+        ...otherData
+      };
+      
+      // Handle date conversion separately
+      if (authorizationDate) {
+        updateData.authorizationDate = new Date(authorizationDate);
+      }
       
       // Update the credit
-      const updatedCredit = await storage.updateCarbonCredit(id, complianceData);
+      const updatedCredit = await storage.updateCarbonCredit(id, updateData);
       
       // Log the update
       await storage.createActivityLog({
