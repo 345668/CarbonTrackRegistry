@@ -20,6 +20,7 @@ import Users from "./pages/Users";
 import Settings from "./pages/Settings";
 import NewProject from "./pages/NewProject";
 import ProjectDetail from "./pages/ProjectDetail";
+import VerifyCertificate from "./pages/verify-certificate";
 
 function Router() {
   const [location] = useLocation();
@@ -38,6 +39,7 @@ function Router() {
         <ProtectedRoute path="/methodologies" component={Methodologies} />
         <ProtectedRoute path="/users" component={Users} />
         <ProtectedRoute path="/settings" component={Settings} />
+        <AnimatedRoute path="/verify-certificate" component={VerifyCertificate} />
         <AnimatedRoute path="/:rest*" component={NotFound} />
       </Switch>
     </AnimatePresence>
