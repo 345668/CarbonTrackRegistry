@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { StatCard, Statistics } from "@/types";
 import { formatNumber } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Link } from "wouter";
 
 export default function DashboardStats() {
   const { data: stats, isLoading } = useQuery<Statistics>({
@@ -70,33 +71,49 @@ export default function DashboardStats() {
   );
 }
 
-function StatCardComponent({ title, value, percentChange, icon, color, borderColor }: StatCard) {
+function StatCardComponent({ title, value, percentChange, icon, color, borderColor, href }: StatCard) {
   const isPositive = percentChange ? percentChange > 0 : false;
   
-  return (
-    <Card className={`shadow-sm ${borderColor} border`}>
-      <CardContent className="px-4 py-5 sm:p-6">
-        <div className="flex items-center">
-          <div className={`flex-shrink-0 rounded-md p-3 ${color}`}>
-            <span className="material-icons">{icon}</span>
-          </div>
-          <div className="ml-5 w-0 flex-1">
-            <dl>
-              <dt className="text-sm font-medium text-neutral-500 truncate">{title}</dt>
-              <dd className="flex items-baseline">
-                <div className="text-2xl font-semibold text-neutral-900">{value}</div>
-                {percentChange && (
-                  <div className={`ml-2 flex items-baseline text-sm font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                    <span className="material-icons text-sm">{isPositive ? 'arrow_upward' : 'arrow_downward'}</span>
-                    <span className="sr-only">{isPositive ? 'Increased by' : 'Decreased by'}</span>
-                    {Math.abs(percentChange)}%
-                  </div>
-                )}
-              </dd>
-            </dl>
-          </div>
+  const cardContent = (
+    <CardContent className="px-4 py-5 sm:p-6">
+      <div className="flex items-center">
+        <div className={`flex-shrink-0 rounded-md p-3 ${color}`}>
+          <span className="material-icons">{icon}</span>
         </div>
-      </CardContent>
+        <div className="ml-5 w-0 flex-1">
+          <dl>
+            <dt className="text-sm font-medium text-neutral-500 truncate">{title}</dt>
+            <dd className="flex items-baseline">
+              <div className="text-2xl font-semibold text-neutral-900">{value}</div>
+              {percentChange && (
+                <div className={`ml-2 flex items-baseline text-sm font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className="material-icons text-sm">{isPositive ? 'arrow_upward' : 'arrow_downward'}</span>
+                  <span className="sr-only">{isPositive ? 'Increased by' : 'Decreased by'}</span>
+                  {Math.abs(percentChange)}%
+                </div>
+              )}
+            </dd>
+          </dl>
+        </div>
+      </div>
+    </CardContent>
+  );
+  
+  const cardClasses = `shadow-sm ${borderColor} border ${href ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`;
+  
+  if (href) {
+    return (
+      <a href={href}>
+        <Card className={cardClasses}>
+          {cardContent}
+        </Card>
+      </a>
+    );
+  }
+  
+  return (
+    <Card className={cardClasses}>
+      {cardContent}
     </Card>
   );
 }

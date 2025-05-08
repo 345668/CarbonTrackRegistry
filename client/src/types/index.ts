@@ -168,6 +168,7 @@ export interface StatCard {
   borderColor?: string;
   prefix?: string;
   suffix?: string;
+  href?: string;
 }
 
 export interface NavigationItem {

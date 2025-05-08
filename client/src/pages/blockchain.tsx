@@ -128,6 +128,19 @@ export default function BlockchainPage() {
   const [showVerifyDialog, setShowVerifyDialog] = useState(false);
   const [txToVerify, setTxToVerify] = useState('');
   const isAdmin = user?.role === 'admin';
+  
+  // Check for tab parameter in URL
+  React.useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['transactions', 'paris-compliance', 'configuration'].includes(tabParam)) {
+      // Only set admin tabs if user is admin
+      if (tabParam === 'configuration' && !isAdmin) {
+        return;
+      }
+      setActiveTab(tabParam);
+    }
+  }, [isAdmin]);
 
   // Query for blockchain records
   const { 
