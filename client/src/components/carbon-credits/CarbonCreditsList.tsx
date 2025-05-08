@@ -269,7 +269,7 @@ export default function CarbonCreditsList({ credits }: CarbonCreditsListProps) {
           </DialogHeader>
           
           <div className="py-4">
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="bg-neutral-50 p-4 rounded-md">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
@@ -291,9 +291,31 @@ export default function CarbonCreditsList({ credits }: CarbonCreditsListProps) {
                 </div>
               </div>
               
+              <div className="space-y-3">
+                <div className="grid w-full gap-1.5">
+                  <Label htmlFor="retirement-purpose">Retirement Purpose</Label>
+                  <Input
+                    id="retirement-purpose"
+                    placeholder="e.g., Corporate carbon neutrality, Voluntary offsetting"
+                    value={retirementDetails.purpose}
+                    onChange={(e) => setRetirementDetails({...retirementDetails, purpose: e.target.value})}
+                  />
+                </div>
+                
+                <div className="grid w-full gap-1.5">
+                  <Label htmlFor="retirement-beneficiary">Beneficiary (Optional)</Label>
+                  <Input
+                    id="retirement-beneficiary"
+                    placeholder="e.g., Acme Corporation, Personal use"
+                    value={retirementDetails.beneficiary}
+                    onChange={(e) => setRetirementDetails({...retirementDetails, beneficiary: e.target.value})}
+                  />
+                </div>
+              </div>
+              
               <div className="bg-yellow-50 p-4 rounded-md border border-yellow-100">
                 <div className="flex items-start">
-                  <span className="material-icons text-yellow-500 mr-2">warning</span>
+                  <FileCheck className="h-5 w-5 text-yellow-500 mt-0.5 mr-2" />
                   <div>
                     <p className="text-sm font-medium text-yellow-800">This action cannot be undone</p>
                     <p className="text-xs text-yellow-700 mt-1">
@@ -315,9 +337,107 @@ export default function CarbonCreditsList({ credits }: CarbonCreditsListProps) {
               disabled={retireCreditMutation.isPending}
             >
               {retireCreditMutation.isPending && (
-                <span className="material-icons mr-2 animate-spin text-sm">refresh</span>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
               )}
               Confirm Retirement
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Transfer Credits Dialog */}
+      <Dialog open={showTransferDialog} onOpenChange={setShowTransferDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Transfer Carbon Credits</DialogTitle>
+            <DialogDescription>
+              Transfer carbon credits to another account to facilitate trading or ownership changes.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="space-y-4">
+              <div className="bg-neutral-50 p-4 rounded-md">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="text-xs text-neutral-500">Serial Number</p>
+                    <p className="text-sm font-medium">{selectedCredit?.serialNumber}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-neutral-500">Project ID</p>
+                    <p className="text-sm font-medium">{selectedCredit?.projectId}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-neutral-500">Quantity</p>
+                    <p className="text-sm font-medium">{formatNumber(selectedCredit?.quantity || 0)} tCO₂e</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-neutral-500">Current Owner</p>
+                    <p className="text-sm font-medium">{selectedCredit?.owner}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="grid w-full gap-1.5">
+                  <Label htmlFor="transfer-recipient">Transfer Recipient</Label>
+                  <select
+                    id="transfer-recipient"
+                    value={transferDetails.recipient}
+                    onChange={(e) => setTransferDetails({...transferDetails, recipient: e.target.value})}
+                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="">Select recipient...</option>
+                    {users?.map(user => (
+                      <option key={user.id} value={user.username}>
+                        {user.fullName} ({user.username})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="grid w-full gap-1.5">
+                  <Label htmlFor="transfer-purpose">Transfer Purpose (Optional)</Label>
+                  <Textarea
+                    id="transfer-purpose"
+                    placeholder="e.g., Sale of carbon credits, Internal corporate transfer"
+                    value={transferDetails.purpose}
+                    onChange={(e) => setTransferDetails({...transferDetails, purpose: e.target.value})}
+                    className="resize-none"
+                    rows={3}
+                  />
+                </div>
+              </div>
+              
+              <div className="bg-blue-50 p-4 rounded-md border border-blue-100">
+                <div className="flex items-start">
+                  <ArrowUpRight className="h-5 w-5 text-blue-500 mt-0.5 mr-2" />
+                  <div>
+                    <p className="text-sm font-medium text-blue-800">Transfer Information</p>
+                    <p className="text-xs text-blue-700 mt-1">
+                      This will transfer ownership of the credits to the recipient. They will have full control over the credits after the transfer.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTransferDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="default" 
+              onClick={handleTransferCredits}
+              disabled={transferCreditMutation.isPending || !transferDetails.recipient}
+            >
+              {transferCreditMutation.isPending ? (
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4 mr-2" />
+              )}
+              Transfer Credits
             </Button>
           </DialogFooter>
         </DialogContent>

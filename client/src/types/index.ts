@@ -101,6 +101,11 @@ export interface CarbonCredit {
   status: "available" | "retired" | "transferred";
   issuanceDate: string;
   retirementDate?: string;
+  retirementPurpose?: string;
+  retirementBeneficiary?: string;
+  transferDate?: string;
+  transferRecipient?: string;
+  transferPurpose?: string;
   owner: string;
 }
 
