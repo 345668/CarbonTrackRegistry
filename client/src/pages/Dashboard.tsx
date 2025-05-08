@@ -33,6 +33,12 @@ export default function Dashboard() {
                 Verify Certificate
               </Button>
             </Link>
+            <Link href="/blockchain">
+              <Button variant="outline" className="inline-flex items-center gap-1.5 shadow-sm">
+                <span className="material-icons text-sm">account_balance</span>
+                Blockchain
+              </Button>
+            </Link>
             <Link href="/projects/new">
               <Button className="inline-flex items-center gap-1.5 shadow-sm">
                 <span className="material-icons text-sm">add</span>

@@ -43,6 +43,15 @@ export default function DashboardStats() {
       borderColor: "border-green-500/20",
     },
     {
+      title: "Paris Agreement Compliance",
+      value: "Article 6",
+      percentChange: 23,
+      icon: "account_balance",
+      color: "bg-purple-500/10 text-purple-600",
+      borderColor: "border-purple-500/20",
+      href: "/blockchain?tab=paris-compliance",
+    },
+    {
       title: "Pending Verification",
       value: formatNumber(stats.pendingVerification),
       percentChange: -3,
