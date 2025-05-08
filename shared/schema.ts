@@ -1,6 +1,7 @@
 import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { blockchainRecordSchema, blockchainConfigSchema } from "./blockchain";
 
 // User table
 export const users = pgTable("users", {
@@ -350,3 +351,59 @@ export const insertCorrespondingAdjustmentSchema = createInsertSchema(correspond
 
 export type InsertCorrespondingAdjustment = z.infer<typeof insertCorrespondingAdjustmentSchema>;
 export type CorrespondingAdjustment = typeof correspondingAdjustments.$inferSelect;
+
+// Blockchain Records
+export const blockchainRecords = pgTable("blockchain_records", {
+  id: serial("id").primaryKey(),
+  txHash: text("tx_hash").notNull().unique(),
+  entityType: text("entity_type").notNull(), // project, credit, verification, adjustment
+  entityId: text("entity_id").notNull(), // Reference to the related entity
+  action: text("action").notNull(), // created, updated, transferred, retired, adjusted
+  data: json("data"), // Arbitrary JSON data related to the transaction
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
+  blockNumber: integer("block_number"),
+  chainId: integer("chain_id"),
+  network: text("network"),
+});
+
+export const insertBlockchainRecordSchema = createInsertSchema(blockchainRecords).pick({
+  txHash: true,
+  entityType: true,
+  entityId: true,
+  action: true,
+  data: true,
+  blockNumber: true,
+  chainId: true,
+  network: true,
+});
+
+export type InsertBlockchainRecord = z.infer<typeof insertBlockchainRecordSchema>;
+export type BlockchainRecord = typeof blockchainRecords.$inferSelect;
+
+// Blockchain Configuration
+export const blockchainConfig = pgTable("blockchain_config", {
+  id: serial("id").primaryKey(),
+  enabled: boolean("enabled").notNull().default(false),
+  provider: text("provider"),
+  apiKey: text("api_key"),
+  chainId: integer("chain_id"),
+  contractAddress: text("contract_address"),
+  privateKey: text("private_key"),
+  gasPrice: integer("gas_price"),
+  gasLimit: integer("gas_limit"),
+  lastUpdated: timestamp("last_updated").notNull().defaultNow(),
+});
+
+export const insertBlockchainConfigSchema = createInsertSchema(blockchainConfig).pick({
+  enabled: true,
+  provider: true,
+  apiKey: true,
+  chainId: true,
+  contractAddress: true,
+  privateKey: true,
+  gasPrice: true,
+  gasLimit: true,
+});
+
+export type InsertBlockchainConfig = z.infer<typeof insertBlockchainConfigSchema>;
+export type BlockchainConfig = typeof blockchainConfig.$inferSelect;

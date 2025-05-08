@@ -37,7 +37,13 @@ import {
   type InsertStatistics,
   correspondingAdjustments,
   type CorrespondingAdjustment,
-  type InsertCorrespondingAdjustment
+  type InsertCorrespondingAdjustment,
+  blockchainRecords,
+  type BlockchainRecord,
+  type InsertBlockchainRecord,
+  blockchainConfig,
+  type BlockchainConfig,
+  type InsertBlockchainConfig
 } from "@shared/schema";
 
 import { eq, desc, like, sql, and, or } from "drizzle-orm";
@@ -128,6 +134,17 @@ export interface IStorage {
   listCorrespondingAdjustments(): Promise<CorrespondingAdjustment[]>;
   listCorrespondingAdjustmentsByStatus(status: string): Promise<CorrespondingAdjustment[]>;
   listCorrespondingAdjustmentsByCountry(country: string, isHost: boolean): Promise<CorrespondingAdjustment[]>;
+  
+  // Blockchain Record operations
+  getBlockchainRecord(id: number): Promise<BlockchainRecord | undefined>;
+  getBlockchainRecordByTxHash(txHash: string): Promise<BlockchainRecord | undefined>;
+  getBlockchainRecordsByEntity(entityType: string, entityId: string): Promise<BlockchainRecord[]>;
+  createBlockchainRecord(record: InsertBlockchainRecord): Promise<BlockchainRecord>;
+  listBlockchainRecords(limit?: number): Promise<BlockchainRecord[]>;
+  
+  // Blockchain Config operations
+  getBlockchainConfig(): Promise<BlockchainConfig | undefined>;
+  updateBlockchainConfig(config: Partial<InsertBlockchainConfig>): Promise<BlockchainConfig>;
 }
 
 export class DatabaseStorage implements IStorage {
