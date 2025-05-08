@@ -47,6 +47,9 @@ export interface VerificationStage {
   name: string;
   description?: string;
   order: number;
+  requiredDocuments?: string[];
+  requiredFields?: string[];
+  icon?: string;
 }
 
 export interface ProjectVerification {
@@ -59,6 +62,34 @@ export interface ProjectVerification {
   estimatedCompletionDate?: string;
   completedDate?: string;
   notes?: string;
+  verificationReport?: string;
+  verificationStandard?: string;
+  thirdPartyVerifier?: string;
+  contactEmail?: string;
+  completedStages?: number[];
+}
+
+export interface VerificationDocument {
+  id: number;
+  verificationId: number;
+  stageId: number;
+  documentType: string;
+  documentName: string;
+  documentUrl: string;
+  uploadedBy: number;
+  uploadedAt: string;
+  status: "pending" | "approved" | "rejected";
+  notes?: string;
+}
+
+export interface VerificationComment {
+  id: number;
+  verificationId: number;
+  stageId: number;
+  comment: string;
+  commentedBy: number;
+  commentedAt: string;
+  isInternal: boolean;
 }
 
 export interface CarbonCredit {
