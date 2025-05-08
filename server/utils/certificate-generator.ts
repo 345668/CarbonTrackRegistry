@@ -341,9 +341,9 @@ export async function pdfToBuffer(doc: PDFKit.PDFDocument): Promise<Buffer> {
     
     doc.pipe(stream);
     
-    stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+    stream.on('data', (chunk: Buffer) => chunks.push(Buffer.from(chunk)));
     stream.on('end', () => resolve(Buffer.concat(chunks)));
-    stream.on('error', (err) => reject(err));
+    stream.on('error', (err: Error) => reject(err));
     
     doc.end();
   });
