@@ -9,6 +9,8 @@ import {
   insertProjectSchema,
   insertVerificationStageSchema,
   insertProjectVerificationSchema,
+  insertVerificationDocumentSchema,
+  insertVerificationCommentSchema,
   insertCarbonCreditSchema,
   insertActivityLogSchema,
   insertStatisticsSchema
@@ -216,6 +218,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/verification-stages", async (req, res) => {
+    try {
+      const stageData = insertVerificationStageSchema.parse(req.body);
+      const stage = await storage.createVerificationStage(stageData);
+      res.status(201).json(stage);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create verification stage" });
+    }
+  });
+
+  app.put("/api/verification-stages/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const stage = await storage.getVerificationStage(id);
+      
+      if (!stage) {
+        return res.status(404).json({ error: "Verification stage not found" });
+      }
+      
+      const updateData = insertVerificationStageSchema.partial().parse(req.body);
+      const updatedStage = await storage.updateVerificationStage(id, updateData);
+      
+      res.json(updatedStage);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update verification stage" });
+    }
+  });
+
   // Project Verifications API
   app.get("/api/verifications", async (req, res) => {
     try {
@@ -323,6 +359,151 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: error.errors });
       }
       res.status(500).json({ error: "Failed to update verification" });
+    }
+  });
+
+  app.post("/api/verifications/:id/complete-stage/:stageId", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const stageId = parseInt(req.params.stageId);
+      
+      const verification = await storage.getProjectVerification(id);
+      if (!verification) {
+        return res.status(404).json({ error: "Verification not found" });
+      }
+      
+      const stage = await storage.getVerificationStage(stageId);
+      if (!stage) {
+        return res.status(404).json({ error: "Verification stage not found" });
+      }
+      
+      const updatedVerification = await storage.completeVerificationStage(id, stageId);
+      
+      // Create activity log
+      await storage.createActivityLog({
+        action: "verification_stage_completed",
+        description: `Stage ${stage.name} completed for project ${verification.projectId}`,
+        entityType: "verification",
+        entityId: verification.projectId,
+        userId: 1 // Assuming admin user
+      });
+      
+      res.json(updatedVerification);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to complete verification stage" });
+    }
+  });
+
+  // Verification Documents API
+  app.get("/api/verification-documents", async (req, res) => {
+    try {
+      const { verificationId, stageId } = req.query;
+      
+      let documents;
+      if (verificationId && stageId) {
+        documents = await storage.listVerificationDocumentsByStage(
+          parseInt(verificationId as string), 
+          parseInt(stageId as string)
+        );
+      } else if (verificationId) {
+        documents = await storage.listVerificationDocumentsByVerification(parseInt(verificationId as string));
+      } else {
+        return res.status(400).json({ error: "Missing required parameters" });
+      }
+      
+      res.json(documents);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch verification documents" });
+    }
+  });
+
+  app.post("/api/verification-documents", async (req, res) => {
+    try {
+      const documentData = insertVerificationDocumentSchema.parse(req.body);
+      const document = await storage.createVerificationDocument(documentData);
+      
+      // Create activity log
+      await storage.createActivityLog({
+        action: "verification_document_uploaded",
+        description: `Document ${documentData.documentName} uploaded for verification #${documentData.verificationId}`,
+        entityType: "verification",
+        entityId: document.id.toString(),
+        userId: documentData.uploadedBy
+      });
+      
+      res.status(201).json(document);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create verification document" });
+    }
+  });
+
+  app.put("/api/verification-documents/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const document = await storage.getVerificationDocument(id);
+      
+      if (!document) {
+        return res.status(404).json({ error: "Verification document not found" });
+      }
+      
+      const updateData = insertVerificationDocumentSchema.partial().parse(req.body);
+      const updatedDocument = await storage.updateVerificationDocument(id, updateData);
+      
+      res.json(updatedDocument);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update verification document" });
+    }
+  });
+
+  // Verification Comments API
+  app.get("/api/verification-comments", async (req, res) => {
+    try {
+      const { verificationId, stageId } = req.query;
+      
+      let comments;
+      if (verificationId && stageId) {
+        comments = await storage.listVerificationCommentsByStage(
+          parseInt(verificationId as string), 
+          parseInt(stageId as string)
+        );
+      } else if (verificationId) {
+        comments = await storage.listVerificationCommentsByVerification(parseInt(verificationId as string));
+      } else {
+        return res.status(400).json({ error: "Missing required parameters" });
+      }
+      
+      res.json(comments);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch verification comments" });
+    }
+  });
+
+  app.post("/api/verification-comments", async (req, res) => {
+    try {
+      const commentData = insertVerificationCommentSchema.parse(req.body);
+      const comment = await storage.createVerificationComment(commentData);
+      
+      // Create activity log
+      await storage.createActivityLog({
+        action: "verification_comment_added",
+        description: `Comment added to verification #${commentData.verificationId}`,
+        entityType: "verification",
+        entityId: comment.id.toString(),
+        userId: commentData.commentedBy
+      });
+      
+      res.status(201).json(comment);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create verification comment" });
     }
   });
 

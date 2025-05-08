@@ -109,12 +109,18 @@ export const verificationStages = pgTable("verification_stages", {
   name: text("name").notNull().unique(), // e.g., "Data Validation", "Field Audit", "Final Review"
   description: text("description"),
   order: integer("order").notNull(), // To define the sequence of stages
+  requiredDocuments: text("required_documents").array(), // Array of required document types for this stage
+  requiredFields: text("required_fields").array(), // Array of required fields to be completed
+  icon: text("icon"), // Icon identifier for display
 });
 
 export const insertVerificationStageSchema = createInsertSchema(verificationStages).pick({
   name: true,
   description: true,
   order: true,
+  requiredDocuments: true,
+  requiredFields: true,
+  icon: true,
 });
 
 export type InsertVerificationStage = z.infer<typeof insertVerificationStageSchema>;
@@ -131,6 +137,11 @@ export const projectVerifications = pgTable("project_verifications", {
   estimatedCompletionDate: timestamp("estimated_completion_date"),
   completedDate: timestamp("completed_date"),
   notes: text("notes"),
+  verificationReport: text("verification_report"), // Link to the final verification report document
+  verificationStandard: text("verification_standard"), // The standard used for verification (e.g., VCS, Gold Standard)
+  thirdPartyVerifier: text("third_party_verifier"), // Name of third-party verification entity if applicable
+  contactEmail: text("contact_email"), // Contact email for verification queries
+  completedStages: integer("completed_stages").array(), // Array of completed stage IDs
 });
 
 export const insertProjectVerificationSchema = createInsertSchema(projectVerifications).pick({
@@ -140,10 +151,65 @@ export const insertProjectVerificationSchema = createInsertSchema(projectVerific
   status: true,
   estimatedCompletionDate: true,
   notes: true,
+  verificationReport: true,
+  verificationStandard: true,
+  thirdPartyVerifier: true,
+  contactEmail: true,
+  completedStages: true,
 });
 
 export type InsertProjectVerification = z.infer<typeof insertProjectVerificationSchema>;
 export type ProjectVerification = typeof projectVerifications.$inferSelect;
+
+// Verification Documents
+export const verificationDocuments = pgTable("verification_documents", {
+  id: serial("id").primaryKey(),
+  verificationId: integer("verification_id").notNull(), // Reference to project_verifications.id
+  stageId: integer("stage_id").notNull(), // Reference to verification_stages.id
+  documentType: text("document_type").notNull(), // Type of document (e.g., "methodology_assessment", "site_inspection_report")
+  documentName: text("document_name").notNull(),
+  documentUrl: text("document_url").notNull(),
+  uploadedBy: integer("uploaded_by").notNull(), // Reference to users.id
+  uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
+  status: text("status").notNull().default("pending"), // pending, approved, rejected
+  notes: text("notes"),
+});
+
+export const insertVerificationDocumentSchema = createInsertSchema(verificationDocuments).pick({
+  verificationId: true,
+  stageId: true,
+  documentType: true,
+  documentName: true,
+  documentUrl: true,
+  uploadedBy: true,
+  status: true,
+  notes: true,
+});
+
+export type InsertVerificationDocument = z.infer<typeof insertVerificationDocumentSchema>;
+export type VerificationDocument = typeof verificationDocuments.$inferSelect;
+
+// Verification Comments
+export const verificationComments = pgTable("verification_comments", {
+  id: serial("id").primaryKey(),
+  verificationId: integer("verification_id").notNull(), // Reference to project_verifications.id
+  stageId: integer("stage_id").notNull(), // Reference to verification_stages.id
+  comment: text("comment").notNull(),
+  commentedBy: integer("commented_by").notNull(), // Reference to users.id
+  commentedAt: timestamp("commented_at").notNull().defaultNow(),
+  isInternal: boolean("is_internal").notNull().default(false), // Flag for internal-only comments
+});
+
+export const insertVerificationCommentSchema = createInsertSchema(verificationComments).pick({
+  verificationId: true,
+  stageId: true,
+  comment: true,
+  commentedBy: true,
+  isInternal: true,
+});
+
+export type InsertVerificationComment = z.infer<typeof insertVerificationCommentSchema>;
+export type VerificationComment = typeof verificationComments.$inferSelect;
 
 // Carbon Credits
 export const carbonCredits = pgTable("carbon_credits", {

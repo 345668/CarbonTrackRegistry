@@ -20,6 +20,12 @@ import {
   projectVerifications,
   type ProjectVerification,
   type InsertProjectVerification,
+  verificationDocuments,
+  type VerificationDocument,
+  type InsertVerificationDocument,
+  verificationComments,
+  type VerificationComment,
+  type InsertVerificationComment,
   carbonCredits,
   type CarbonCredit,
   type InsertCarbonCredit,
@@ -68,6 +74,7 @@ export interface IStorage {
   // Verification Stage operations
   getVerificationStage(id: number): Promise<VerificationStage | undefined>;
   createVerificationStage(stage: InsertVerificationStage): Promise<VerificationStage>;
+  updateVerificationStage(id: number, stage: Partial<InsertVerificationStage>): Promise<VerificationStage | undefined>;
   listVerificationStages(): Promise<VerificationStage[]>;
   
   // Project Verification operations
@@ -77,6 +84,20 @@ export interface IStorage {
   updateProjectVerification(id: number, verification: Partial<InsertProjectVerification>): Promise<ProjectVerification | undefined>;
   listProjectVerifications(): Promise<ProjectVerification[]>;
   listProjectVerificationsByStatus(status: string): Promise<ProjectVerification[]>;
+  completeVerificationStage(verificationId: number, stageId: number): Promise<ProjectVerification | undefined>;
+  
+  // Verification Document operations
+  getVerificationDocument(id: number): Promise<VerificationDocument | undefined>;
+  createVerificationDocument(document: InsertVerificationDocument): Promise<VerificationDocument>;
+  updateVerificationDocument(id: number, document: Partial<InsertVerificationDocument>): Promise<VerificationDocument | undefined>;
+  listVerificationDocumentsByVerification(verificationId: number): Promise<VerificationDocument[]>;
+  listVerificationDocumentsByStage(verificationId: number, stageId: number): Promise<VerificationDocument[]>;
+  
+  // Verification Comment operations
+  getVerificationComment(id: number): Promise<VerificationComment | undefined>;
+  createVerificationComment(comment: InsertVerificationComment): Promise<VerificationComment>;
+  listVerificationCommentsByVerification(verificationId: number): Promise<VerificationComment[]>;
+  listVerificationCommentsByStage(verificationId: number, stageId: number): Promise<VerificationComment[]>;
   
   // Carbon Credit operations
   getCarbonCredit(id: number): Promise<CarbonCredit | undefined>;
@@ -267,6 +288,110 @@ export class DatabaseStorage implements IStorage {
   
   async listProjectVerificationsByStatus(status: string): Promise<ProjectVerification[]> {
     return await db.select().from(projectVerifications).where(eq(projectVerifications.status, status));
+  }
+  
+  async completeVerificationStage(verificationId: number, stageId: number): Promise<ProjectVerification | undefined> {
+    // Get the current verification
+    const verification = await this.getProjectVerification(verificationId);
+    if (!verification) return undefined;
+    
+    // If completedStages is null or undefined, initialize it with an empty array
+    const completedStages = verification.completedStages || [];
+    
+    // If this stage is already completed, just return the verification
+    if (completedStages.includes(stageId)) {
+      return verification;
+    }
+    
+    // Add the stage to the completed stages
+    const updatedCompletedStages = [...completedStages, stageId];
+    
+    // Get the next verification stage
+    const stages = await this.listVerificationStages();
+    const currentStageIndex = stages.findIndex(s => s.id === stageId);
+    const nextStage = stages[currentStageIndex + 1];
+    
+    // Update the verification
+    const updatedVerification = await this.updateProjectVerification(verificationId, {
+      completedStages: updatedCompletedStages,
+      currentStage: nextStage ? nextStage.id : stageId, // Move to next stage if available
+    });
+    
+    return updatedVerification;
+  }
+  
+  async updateVerificationStage(id: number, stage: Partial<InsertVerificationStage>): Promise<VerificationStage | undefined> {
+    const [updatedStage] = await db
+      .update(verificationStages)
+      .set(stage)
+      .where(eq(verificationStages.id, id))
+      .returning();
+    return updatedStage || undefined;
+  }
+  
+  async getVerificationDocument(id: number): Promise<VerificationDocument | undefined> {
+    const [document] = await db.select().from(verificationDocuments).where(eq(verificationDocuments.id, id));
+    return document || undefined;
+  }
+  
+  async createVerificationDocument(document: InsertVerificationDocument): Promise<VerificationDocument> {
+    const [newDocument] = await db
+      .insert(verificationDocuments)
+      .values(document)
+      .returning();
+    return newDocument;
+  }
+  
+  async updateVerificationDocument(id: number, document: Partial<InsertVerificationDocument>): Promise<VerificationDocument | undefined> {
+    const [updatedDocument] = await db
+      .update(verificationDocuments)
+      .set(document)
+      .where(eq(verificationDocuments.id, id))
+      .returning();
+    return updatedDocument || undefined;
+  }
+  
+  async listVerificationDocumentsByVerification(verificationId: number): Promise<VerificationDocument[]> {
+    return await db.select().from(verificationDocuments).where(eq(verificationDocuments.verificationId, verificationId));
+  }
+  
+  async listVerificationDocumentsByStage(verificationId: number, stageId: number): Promise<VerificationDocument[]> {
+    return await db.select().from(verificationDocuments).where(
+      and(
+        eq(verificationDocuments.verificationId, verificationId),
+        eq(verificationDocuments.stageId, stageId)
+      )
+    );
+  }
+  
+  async getVerificationComment(id: number): Promise<VerificationComment | undefined> {
+    const [comment] = await db.select().from(verificationComments).where(eq(verificationComments.id, id));
+    return comment || undefined;
+  }
+  
+  async createVerificationComment(comment: InsertVerificationComment): Promise<VerificationComment> {
+    const [newComment] = await db
+      .insert(verificationComments)
+      .values(comment)
+      .returning();
+    return newComment;
+  }
+  
+  async listVerificationCommentsByVerification(verificationId: number): Promise<VerificationComment[]> {
+    return await db.select().from(verificationComments)
+      .where(eq(verificationComments.verificationId, verificationId))
+      .orderBy(desc(verificationComments.commentedAt));
+  }
+  
+  async listVerificationCommentsByStage(verificationId: number, stageId: number): Promise<VerificationComment[]> {
+    return await db.select().from(verificationComments)
+      .where(
+        and(
+          eq(verificationComments.verificationId, verificationId),
+          eq(verificationComments.stageId, stageId)
+        )
+      )
+      .orderBy(desc(verificationComments.commentedAt));
   }
   
   async getCarbonCredit(id: number): Promise<CarbonCredit | undefined> {
