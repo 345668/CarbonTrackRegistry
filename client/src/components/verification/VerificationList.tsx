@@ -41,10 +41,20 @@ interface VerificationListProps {
 }
 
 export default function VerificationList({ verifications, stages }: VerificationListProps) {
-  const [selectedVerification, setSelectedVerification] = useState<ProjectVerification | null>(null);
-  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const { toast } = useToast();
   
+  // All state declarations at the top
+  const [selectedVerification, setSelectedVerification] = useState<ProjectVerification | null>(null);
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [thirdPartyInfo, setThirdPartyInfo] = useState({
+    name: "",
+    email: "",
+    standard: "",
+    showDialog: false,
+    selectedVerificationId: 0
+  });
+  
+  // Mutations
   const updateVerification = useMutation({
     mutationFn: async (data: { id: number, stageId: number }) => {
       return await apiRequest("PUT", `/api/verifications/${data.id}`, {
@@ -115,48 +125,6 @@ export default function VerificationList({ verifications, stages }: Verification
     },
   });
   
-  const handleUpdateVerificationStage = (stageId: number) => {
-    if (selectedVerification) {
-      updateVerification.mutate({ id: selectedVerification.id, stageId });
-    }
-  };
-  
-  const handleViewDetails = (verification: ProjectVerification) => {
-    setSelectedVerification(verification);
-    setShowDetailsDialog(true);
-  };
-  
-  const handleApprove = () => {
-    if (selectedVerification) {
-      approveVerification.mutate(selectedVerification.id);
-    }
-  };
-  
-  const handleReject = () => {
-    if (selectedVerification) {
-      rejectVerification.mutate(selectedVerification.id);
-    }
-  };
-
-  if (verifications.length === 0) {
-    return (
-      <div className="bg-white rounded-lg p-8 text-center">
-        <span className="material-icons text-5xl text-neutral-300 mb-2">verified</span>
-        <h3 className="text-lg font-medium text-neutral-900 mb-2">No Verifications Found</h3>
-        <p className="text-neutral-500 mb-4">There are no verifications matching your criteria</p>
-      </div>
-    );
-  }
-
-  // Add third-party verifier information
-  const [thirdPartyInfo, setThirdPartyInfo] = useState({
-    name: "",
-    email: "",
-    standard: "",
-    showDialog: false,
-    selectedVerificationId: 0
-  });
-  
   const assignThirdPartyVerifier = useMutation({
     mutationFn: async (data: { id: number, verifier: string, email: string, standard: string }) => {
       return await apiRequest("PUT", `/api/verifications/${data.id}`, {
@@ -188,6 +156,30 @@ export default function VerificationList({ verifications, stages }: Verification
     },
   });
   
+  // Event handlers
+  const handleUpdateVerificationStage = (stageId: number) => {
+    if (selectedVerification) {
+      updateVerification.mutate({ id: selectedVerification.id, stageId });
+    }
+  };
+  
+  const handleViewDetails = (verification: ProjectVerification) => {
+    setSelectedVerification(verification);
+    setShowDetailsDialog(true);
+  };
+  
+  const handleApprove = () => {
+    if (selectedVerification) {
+      approveVerification.mutate(selectedVerification.id);
+    }
+  };
+  
+  const handleReject = () => {
+    if (selectedVerification) {
+      rejectVerification.mutate(selectedVerification.id);
+    }
+  };
+  
   const handleAssignThirdParty = (id: number) => {
     setThirdPartyInfo({
       ...thirdPartyInfo,
@@ -214,6 +206,18 @@ export default function VerificationList({ verifications, stages }: Verification
     });
   };
 
+  // Early return for empty state
+  if (verifications.length === 0) {
+    return (
+      <div className="bg-white rounded-lg p-8 text-center">
+        <FileCheck className="h-16 w-16 text-neutral-300 mx-auto mb-2" />
+        <h3 className="text-lg font-medium text-neutral-900 mb-2">No Verifications Found</h3>
+        <p className="text-neutral-500 mb-4">There are no verifications matching your criteria</p>
+      </div>
+    );
+  }
+
+  // Main component render
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
