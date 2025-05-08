@@ -303,7 +303,7 @@ export default function ParisAgreementCompliance({ credit, queryClient }: ParisA
           </div>
           
           {!credit.parisAgreementEligible && (
-            <Alert variant="warning">
+            <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Not eligible</AlertTitle>
               <AlertDescription>

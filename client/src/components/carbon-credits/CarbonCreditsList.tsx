@@ -19,7 +19,8 @@ import { formatDate, formatNumber, getStatusColor } from "@/lib/utils";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { ArrowUpRight, Banknote, FileCheck, RefreshCw, Send } from "lucide-react";
+import { ArrowUpRight, Banknote, FileCheck, Info, RefreshCw, Send } from "lucide-react";
+import CarbonCreditDetail from "./CarbonCreditDetail";
 
 interface CarbonCreditsListProps {
   credits: CarbonCredit[];
@@ -29,6 +30,8 @@ export default function CarbonCreditsList({ credits }: CarbonCreditsListProps) {
   const [selectedCredit, setSelectedCredit] = useState<CarbonCredit | null>(null);
   const [showRetireDialog, setShowRetireDialog] = useState(false);
   const [showTransferDialog, setShowTransferDialog] = useState(false);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [selectedSerialNumber, setSelectedSerialNumber] = useState<string | null>(null);
   const [retirementDetails, setRetirementDetails] = useState({
     purpose: "",
     beneficiary: ""
@@ -134,6 +137,11 @@ export default function CarbonCreditsList({ credits }: CarbonCreditsListProps) {
     setTransferDetails({ recipient: "", purpose: "" });
     setShowTransferDialog(true);
   };
+  
+  const handleViewDetailClick = (credit: CarbonCredit) => {
+    setSelectedSerialNumber(credit.serialNumber);
+    setShowDetailDialog(true);
+  };
 
   if (credits.length === 0) {
     return (
@@ -179,7 +187,16 @@ export default function CarbonCreditsList({ credits }: CarbonCreditsListProps) {
               {credits.map((credit) => (
                 <tr key={credit.id} className="hover:bg-neutral-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
-                    {credit.serialNumber}
+                    <div className="flex items-center">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="p-0 h-auto font-medium text-blue-600 hover:text-blue-800"
+                        onClick={() => handleViewDetailClick(credit)}
+                      >
+                        {credit.serialNumber}
+                      </Button>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-700">
                     {credit.projectId}
@@ -196,60 +213,71 @@ export default function CarbonCreditsList({ credits }: CarbonCreditsListProps) {
                     </Badge>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
-                    {credit.status === "available" && (
-                      <div className="flex space-x-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleTransferClick(credit)}
-                          className="flex items-center"
-                        >
-                          <Send className="h-3.5 w-3.5 mr-1" />
-                          Transfer
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleRetireClick(credit)}
-                          className="flex items-center text-red-600 border-red-200 hover:bg-red-50"
-                        >
-                          <FileCheck className="h-3.5 w-3.5 mr-1" />
-                          Retire
-                        </Button>
-                      </div>
-                    )}
-                    {credit.status === "retired" && (
-                      <div className="flex flex-col">
-                        <span className="text-xs text-green-700 font-semibold flex items-center">
-                          <FileCheck className="h-3.5 w-3.5 mr-1 text-green-600" />
-                          Retired
-                        </span>
-                        <span className="text-xs text-neutral-500">
-                          {formatDate(credit.retirementDate || "", "MMM d, yyyy")}
-                        </span>
-                        {credit.retirementPurpose && (
-                          <span className="text-xs text-neutral-500 mt-1 italic">
-                            For: {credit.retirementPurpose}
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 px-2 text-blue-600"
+                        onClick={() => handleViewDetailClick(credit)}
+                      >
+                        <Info className="h-4 w-4" />
+                      </Button>
+                      
+                      {credit.status === "available" && (
+                        <div className="flex space-x-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleTransferClick(credit)}
+                            className="flex items-center"
+                          >
+                            <Send className="h-3.5 w-3.5 mr-1" />
+                            Transfer
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleRetireClick(credit)}
+                            className="flex items-center text-red-600 border-red-200 hover:bg-red-50"
+                          >
+                            <FileCheck className="h-3.5 w-3.5 mr-1" />
+                            Retire
+                          </Button>
+                        </div>
+                      )}
+                      {credit.status === "retired" && (
+                        <div className="flex flex-col">
+                          <span className="text-xs text-green-700 font-semibold flex items-center">
+                            <FileCheck className="h-3.5 w-3.5 mr-1 text-green-600" />
+                            Retired
                           </span>
-                        )}
-                      </div>
-                    )}
-                    {credit.status === "transferred" && (
-                      <div className="flex flex-col">
-                        <span className="text-xs text-blue-700 font-semibold flex items-center">
-                          <Send className="h-3.5 w-3.5 mr-1 text-blue-600" />
-                          Transferred
-                        </span>
-                        <span className="text-xs text-neutral-500">
-                          {formatDate(credit.transferDate || "", "MMM d, yyyy")}
-                        </span>
-                        {credit.transferRecipient && (
-                          <span className="text-xs text-neutral-500 mt-1">
-                            To: {credit.transferRecipient}
+                          <span className="text-xs text-neutral-500">
+                            {formatDate(credit.retirementDate || "", "MMM d, yyyy")}
                           </span>
-                        )}
-                      </div>
-                    )}
+                          {credit.retirementPurpose && (
+                            <span className="text-xs text-neutral-500 mt-1 italic">
+                              For: {credit.retirementPurpose}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {credit.status === "transferred" && (
+                        <div className="flex flex-col">
+                          <span className="text-xs text-blue-700 font-semibold flex items-center">
+                            <Send className="h-3.5 w-3.5 mr-1 text-blue-600" />
+                            Transferred
+                          </span>
+                          <span className="text-xs text-neutral-500">
+                            {formatDate(credit.transferDate || "", "MMM d, yyyy")}
+                          </span>
+                          {credit.transferRecipient && (
+                            <span className="text-xs text-neutral-500 mt-1">
+                              To: {credit.transferRecipient}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -440,6 +468,18 @@ export default function CarbonCreditsList({ credits }: CarbonCreditsListProps) {
               Transfer Credits
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Credit Detail Dialog */}
+      <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          {selectedSerialNumber && (
+            <CarbonCreditDetail 
+              serialNumber={selectedSerialNumber} 
+              onClose={() => setShowDetailDialog(false)}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </Card>
