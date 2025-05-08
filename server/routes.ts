@@ -569,6 +569,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Record on blockchain
+      try {
+        await blockchainService.recordTransaction(
+          "credit",
+          credit.serialNumber,
+          "created",
+          {
+            projectId: credit.projectId,
+            quantity: credit.quantity,
+            vintage: credit.vintage,
+            owner: credit.owner,
+            issueDate: credit.issuanceDate
+          }
+        );
+      } catch (blockchainError) {
+        console.error("Failed to record credit creation on blockchain:", blockchainError);
+        // We don't fail the API call if blockchain recording fails
+      }
+      
       res.status(201).json(credit);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -674,6 +693,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: req.user?.id || 1
       });
       
+      // Record on blockchain
+      try {
+        await blockchainService.recordTransaction(
+          "credit",
+          credit.serialNumber,
+          "transferred",
+          {
+            from: credit.owner,
+            to: recipient,
+            quantity: credit.quantity,
+            purpose: purpose || "Credit transfer",
+            timestamp: new Date()
+          }
+        );
+      } catch (blockchainError) {
+        console.error("Failed to record credit transfer on blockchain:", blockchainError);
+        // We don't fail the API call if blockchain recording fails
+      }
+      
       res.json(updatedCredit);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -730,6 +768,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         entityId: credit.serialNumber,
         userId: req.user?.id || 1
       });
+      
+      // Record on blockchain
+      try {
+        await blockchainService.recordTransaction(
+          "credit",
+          credit.serialNumber,
+          "retired",
+          {
+            owner: credit.owner,
+            quantity: credit.quantity,
+            purpose: purpose || "Carbon credit retirement",
+            beneficiary: beneficiary,
+            timestamp: new Date()
+          }
+        );
+      } catch (blockchainError) {
+        console.error("Failed to record credit retirement on blockchain:", blockchainError);
+        // We don't fail the API call if blockchain recording fails
+      }
       
       res.json(updatedCredit);
     } catch (error) {
@@ -964,6 +1021,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: req.user?.id || 1
       });
       
+      // Record on blockchain
+      try {
+        await blockchainService.recordTransaction(
+          "adjustment",
+          adjustment.id.toString(),
+          "created",
+          {
+            creditSerialNumber: adjustment.creditSerialNumber,
+            hostCountry: adjustment.hostCountry,
+            recipientCountry: adjustment.recipientCountry,
+            adjustmentType: adjustment.adjustmentType,
+            adjustmentQuantity: adjustment.adjustmentQuantity,
+            ndcTarget: adjustment.ndcTarget
+          }
+        );
+      } catch (blockchainError) {
+        console.error("Failed to record adjustment creation on blockchain:", blockchainError);
+        // We don't fail the API call if blockchain recording fails
+      }
+      
       res.status(201).json(adjustment);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -1056,6 +1133,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: error.errors });
       }
       res.status(500).json({ error: "Failed to update Paris Agreement compliance data" });
+    }
+  });
+
+  // Blockchain API
+  app.get("/api/blockchain/config", async (req, res) => {
+    try {
+      // Check if user is admin
+      if (req.user?.role !== "admin") {
+        return res.status(403).json({ error: "Permission denied" });
+      }
+      
+      const config = await blockchainService.getConfig();
+      // Don't expose private key in response
+      if (config && config.privateKey) {
+        config.privateKey = "********";
+      }
+      res.json(config || { enabled: false });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch blockchain config" });
+    }
+  });
+  
+  app.put("/api/blockchain/config", async (req, res) => {
+    try {
+      // Check if user is admin
+      if (req.user?.role !== "admin") {
+        return res.status(403).json({ error: "Permission denied" });
+      }
+      
+      const configData = insertBlockchainConfigSchema.partial().parse(req.body);
+      const updatedConfig = await blockchainService.updateConfig(configData);
+      
+      // Don't expose private key in response
+      if (updatedConfig && updatedConfig.privateKey) {
+        updatedConfig.privateKey = "********";
+      }
+      
+      res.json(updatedConfig);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update blockchain config" });
+    }
+  });
+  
+  app.get("/api/blockchain/records", async (req, res) => {
+    try {
+      const { limit } = req.query;
+      const records = await blockchainService.getRecentRecords(limit ? parseInt(limit as string) : 10);
+      res.json(records);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch blockchain records" });
+    }
+  });
+  
+  app.get("/api/blockchain/records/:txHash", async (req, res) => {
+    try {
+      const record = await blockchainService.verifyTransaction(req.params.txHash);
+      
+      if (!record) {
+        return res.status(404).json({ error: "Transaction not found" });
+      }
+      
+      res.json(record);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch transaction" });
+    }
+  });
+  
+  app.get("/api/blockchain/records/entity/:type/:id", async (req, res) => {
+    try {
+      const { type, id } = req.params;
+      const records = await blockchainService.getRecordsForEntity(type, id);
+      res.json(records);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch entity records" });
     }
   });
 
