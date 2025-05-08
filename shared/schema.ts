@@ -227,6 +227,16 @@ export const carbonCredits = pgTable("carbon_credits", {
   owner: text("owner").notNull(), // Reference to user
   retirementPurpose: text("retirement_purpose"), // Purpose of retirement (e.g., "Corporate offsetting", "Compliance")
   retirementBeneficiary: text("retirement_beneficiary"), // Entity on whose behalf the credits were retired
+  
+  // Paris Agreement Compliance Fields
+  parisAgreementEligible: boolean("paris_agreement_eligible").default(false), // Whether credit is eligible for Paris Agreement Article 6
+  hostCountry: text("host_country"), // Country where project is located (ISO code)
+  correspondingAdjustmentStatus: text("corresponding_adjustment_status").default("pending"), // pending, approved, rejected
+  correspondingAdjustmentDetails: text("corresponding_adjustment_details"), // Details on the corresponding adjustment
+  internationalTransfer: boolean("international_transfer").default(false), // Whether this credit was transferred internationally
+  mitigationOutcome: text("mitigation_outcome"), // Type of mitigation outcome (e.g., ITMO under Art. 6.2, A6.4ER under Art. 6.4)
+  authorizationReference: text("authorization_reference"), // Reference to the authorization document for international transfer
+  authorizationDate: timestamp("authorization_date"), // Date when the credit was authorized for international transfer
 });
 
 export const insertCarbonCreditSchema = createInsertSchema(carbonCredits).pick({
@@ -242,6 +252,15 @@ export const insertCarbonCreditSchema = createInsertSchema(carbonCredits).pick({
   retirementPurpose: true,
   retirementBeneficiary: true,
   retirementDate: true,
+  // Paris Agreement fields
+  parisAgreementEligible: true,
+  hostCountry: true,
+  correspondingAdjustmentStatus: true,
+  correspondingAdjustmentDetails: true,
+  internationalTransfer: true,
+  mitigationOutcome: true,
+  authorizationReference: true,
+  authorizationDate: true,
 });
 
 export type InsertCarbonCredit = z.infer<typeof insertCarbonCreditSchema>;
@@ -288,3 +307,46 @@ export const insertStatisticsSchema = createInsertSchema(statistics).pick({
 
 export type InsertStatistics = z.infer<typeof insertStatisticsSchema>;
 export type Statistics = typeof statistics.$inferSelect;
+
+// Corresponding Adjustments (for Paris Agreement Article 6)
+export const correspondingAdjustments = pgTable("corresponding_adjustments", {
+  id: serial("id").primaryKey(),
+  creditId: integer("credit_id").notNull(), // Reference to carbon_credits.id
+  creditSerialNumber: text("credit_serial_number").notNull(), // Duplicated for easier queries
+  hostCountry: text("host_country").notNull(), // Country where project is located (ISO code)
+  recipientCountry: text("recipient_country"), // Country receiving the carbon credit (ISO code)
+  adjustmentType: text("adjustment_type").notNull(), // e.g., "Article 6.2", "Article 6.4"
+  adjustmentQuantity: integer("adjustment_quantity").notNull(), // Quantity of credits adjusted
+  adjustmentStatus: text("adjustment_status").notNull().default("pending"), // pending, approved, verified, rejected
+  adjustmentDate: timestamp("adjustment_date"), // Date when adjustment was completed
+  authorizedBy: text("authorized_by"), // Entity authorizing the adjustment
+  verifiedBy: text("verified_by"), // Entity verifying the adjustment
+  ndcTarget: text("ndc_target"), // Related NDC target for the host country
+  mitigationOutcomeType: text("mitigation_outcome_type"), // Type of mitigation outcome
+  authorizationDocument: text("authorization_document"), // URL to authorization document
+  verificationDocument: text("verification_document"), // URL to verification document
+  notes: text("notes"), // Additional notes or details
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at"),
+});
+
+export const insertCorrespondingAdjustmentSchema = createInsertSchema(correspondingAdjustments).pick({
+  creditId: true,
+  creditSerialNumber: true,
+  hostCountry: true,
+  recipientCountry: true,
+  adjustmentType: true,
+  adjustmentQuantity: true,
+  adjustmentStatus: true,
+  adjustmentDate: true,
+  authorizedBy: true,
+  verifiedBy: true,
+  ndcTarget: true,
+  mitigationOutcomeType: true,
+  authorizationDocument: true,
+  verificationDocument: true,
+  notes: true,
+});
+
+export type InsertCorrespondingAdjustment = z.infer<typeof insertCorrespondingAdjustmentSchema>;
+export type CorrespondingAdjustment = typeof correspondingAdjustments.$inferSelect;

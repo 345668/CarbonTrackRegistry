@@ -115,6 +115,16 @@ export interface IStorage {
   // Statistics operations
   getStatistics(): Promise<Statistics | undefined>;
   updateStatistics(stats: Partial<InsertStatistics>): Promise<Statistics | undefined>;
+  
+  // Corresponding Adjustment operations
+  getCorrespondingAdjustment(id: number): Promise<CorrespondingAdjustment | undefined>;
+  getCorrespondingAdjustmentsByCreditId(creditId: number): Promise<CorrespondingAdjustment[]>;
+  getCorrespondingAdjustmentsBySerialNumber(serialNumber: string): Promise<CorrespondingAdjustment[]>;
+  createCorrespondingAdjustment(adjustment: InsertCorrespondingAdjustment): Promise<CorrespondingAdjustment>;
+  updateCorrespondingAdjustment(id: number, adjustment: Partial<InsertCorrespondingAdjustment>): Promise<CorrespondingAdjustment | undefined>;
+  listCorrespondingAdjustments(): Promise<CorrespondingAdjustment[]>;
+  listCorrespondingAdjustmentsByStatus(status: string): Promise<CorrespondingAdjustment[]>;
+  listCorrespondingAdjustmentsByCountry(country: string, isHost: boolean): Promise<CorrespondingAdjustment[]>;
 }
 
 export class DatabaseStorage implements IStorage {

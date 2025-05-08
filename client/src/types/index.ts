@@ -107,6 +107,37 @@ export interface CarbonCredit {
   transferRecipient?: string;
   transferPurpose?: string;
   owner: string;
+  
+  // Paris Agreement Compliance Fields
+  parisAgreementEligible?: boolean;
+  hostCountry?: string;
+  correspondingAdjustmentStatus?: "pending" | "approved" | "rejected";
+  correspondingAdjustmentDetails?: string;
+  internationalTransfer?: boolean;
+  mitigationOutcome?: string;
+  authorizationReference?: string;
+  authorizationDate?: string;
+}
+
+export interface CorrespondingAdjustment {
+  id: number;
+  creditId: number;
+  creditSerialNumber: string;
+  hostCountry: string;
+  recipientCountry?: string;
+  adjustmentType: string;
+  adjustmentQuantity: number;
+  adjustmentStatus: "pending" | "approved" | "verified" | "rejected";
+  adjustmentDate?: string;
+  authorizedBy?: string;
+  verifiedBy?: string;
+  ndcTarget?: string;
+  mitigationOutcomeType?: string;
+  authorizationDocument?: string;
+  verificationDocument?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface ActivityLog {
