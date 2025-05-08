@@ -103,7 +103,7 @@ export default function CarbonCreditDetail({ serialNumber, onClose }: CarbonCred
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <Label className="text-xs text-neutral-500">Issuance Date</Label>
-              <p className="font-medium">{formatDate(credit.issuanceDate)}</p>
+              <p className="font-medium">{credit.issuanceDate ? format(new Date(credit.issuanceDate), "MMM d, yyyy") : "-"}</p>
             </div>
             <div>
               <Label className="text-xs text-neutral-500">Current Owner</Label>
@@ -114,7 +114,7 @@ export default function CarbonCreditDetail({ serialNumber, onClose }: CarbonCred
               <>
                 <div>
                   <Label className="text-xs text-neutral-500">Retirement Date</Label>
-                  <p className="font-medium">{formatDate(credit.retirementDate)}</p>
+                  <p className="font-medium">{credit.retirementDate ? format(new Date(credit.retirementDate), "MMM d, yyyy") : "-"}</p>
                 </div>
                 {credit.retirementPurpose && (
                   <div>
@@ -135,7 +135,7 @@ export default function CarbonCreditDetail({ serialNumber, onClose }: CarbonCred
               <>
                 <div>
                   <Label className="text-xs text-neutral-500">Transfer Date</Label>
-                  <p className="font-medium">{formatDate(credit.transferDate)}</p>
+                  <p className="font-medium">{credit.transferDate ? format(new Date(credit.transferDate), "MMM d, yyyy") : "-"}</p>
                 </div>
                 <div>
                   <Label className="text-xs text-neutral-500">Recipient</Label>
@@ -169,7 +169,7 @@ export default function CarbonCreditDetail({ serialNumber, onClose }: CarbonCred
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-100">Issued</Badge>
                   <span className="text-sm text-muted-foreground">
-                    {formatDate(credit.issuanceDate)}
+                    {credit.issuanceDate ? format(new Date(credit.issuanceDate), "MMM d, yyyy") : "-"}
                   </span>
                 </div>
                 
@@ -177,7 +177,7 @@ export default function CarbonCreditDetail({ serialNumber, onClose }: CarbonCred
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="bg-purple-50 text-purple-700 hover:bg-purple-100">Transferred</Badge>
                     <span className="text-sm text-muted-foreground">
-                      {formatDate(credit.transferDate)} - to {credit.transferRecipient}
+                      {credit.transferDate ? format(new Date(credit.transferDate), "MMM d, yyyy") : "-"} - to {credit.transferRecipient}
                     </span>
                   </div>
                 )}
@@ -186,7 +186,7 @@ export default function CarbonCreditDetail({ serialNumber, onClose }: CarbonCred
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-100">Retired</Badge>
                     <span className="text-sm text-muted-foreground">
-                      {formatDate(credit.retirementDate)} - for {credit.retirementPurpose}
+                      {credit.retirementDate ? format(new Date(credit.retirementDate), "MMM d, yyyy") : "-"} - for {credit.retirementPurpose}
                     </span>
                   </div>
                 )}
