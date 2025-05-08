@@ -22,6 +22,7 @@ import NewProject from "./pages/NewProject";
 import ProjectDetail from "./pages/ProjectDetail";
 import VerifyCertificate from "./pages/verify-certificate";
 import Blockchain from "./pages/blockchain";
+import ApiDocs from "./pages/api-docs";
 
 function Router() {
   const [location] = useLocation();

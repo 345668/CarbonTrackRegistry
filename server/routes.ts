@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { generateCertificate, type ProjectCertificateData, type CreditCertificateData } from "./utils/certificate-generator";
 import { blockchainService } from "./utils/blockchain";
+import { registerExternalApiRoutes } from "./routes/external-api";
 import { 
   insertUserSchema,
   insertProjectCategorySchema,
@@ -28,6 +29,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Set up authentication routes and middleware
   setupAuth(app);
+  
+  // Register external API routes for interoperability with other systems
+  registerExternalApiRoutes(app);
 
   // Users API
   app.get("/api/users", async (req, res) => {
