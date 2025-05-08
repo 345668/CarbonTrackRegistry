@@ -43,6 +43,7 @@ function Router() {
         <ProtectedRoute path="/users" component={Users} />
         <ProtectedRoute path="/settings" component={Settings} />
         <ProtectedRoute path="/blockchain" component={Blockchain} />
+        <ProtectedRoute path="/api-docs" component={ApiDocs} />
         <AnimatedRoute path="/:rest*" component={NotFound} />
       </Switch>
     </AnimatePresence>
