@@ -21,6 +21,7 @@ import Settings from "./pages/Settings";
 import NewProject from "./pages/NewProject";
 import ProjectDetail from "./pages/ProjectDetail";
 import VerifyCertificate from "./pages/verify-certificate";
+import Blockchain from "./pages/blockchain";
 
 function Router() {
   const [location] = useLocation();
@@ -40,6 +41,7 @@ function Router() {
         <ProtectedRoute path="/methodologies" component={Methodologies} />
         <ProtectedRoute path="/users" component={Users} />
         <ProtectedRoute path="/settings" component={Settings} />
+        <ProtectedRoute path="/blockchain" component={Blockchain} />
         <AnimatedRoute path="/:rest*" component={NotFound} />
       </Switch>
     </AnimatePresence>
