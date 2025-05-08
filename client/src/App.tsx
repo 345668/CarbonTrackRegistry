@@ -29,6 +29,7 @@ function Router() {
     <AnimatePresence mode="wait" initial={false}>
       <Switch key={location}>
         <AnimatedRoute path="/auth" component={AuthPage} />
+        <AnimatedRoute path="/verify-certificate" component={VerifyCertificate} />
         <ProtectedRoute path="/" component={Dashboard} />
         <ProtectedRoute path="/projects" component={Projects} />
         <ProtectedRoute path="/projects/new" component={NewProject} />
@@ -39,7 +40,6 @@ function Router() {
         <ProtectedRoute path="/methodologies" component={Methodologies} />
         <ProtectedRoute path="/users" component={Users} />
         <ProtectedRoute path="/settings" component={Settings} />
-        <AnimatedRoute path="/verify-certificate" component={VerifyCertificate} />
         <AnimatedRoute path="/:rest*" component={NotFound} />
       </Switch>
     </AnimatePresence>

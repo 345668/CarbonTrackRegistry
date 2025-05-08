@@ -1,11 +1,46 @@
 import React from 'react';
 import { CertificateVerificationForm } from '@/components/certificates/CertificateVerificationForm';
-import { Shield } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
+import { useLocation } from 'wouter';
+import { Shield, ChevronLeft, Home } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function VerifyCertificatePage() {
+  const { user } = useAuth();
+  const [_, navigate] = useLocation();
+
+  const handleNavigation = () => {
+    if (user) {
+      navigate('/');
+    } else {
+      navigate('/auth');
+    }
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center text-neutral-600 hover:text-primary"
+            onClick={handleNavigation}
+          >
+            {user ? (
+              <>
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                Back to Dashboard
+              </>
+            ) : (
+              <>
+                <Home className="w-4 h-4 mr-1" />
+                Login / Register
+              </>
+            )}
+          </Button>
+        </div>
+        
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4">
             <Shield className="w-8 h-8 text-blue-600" />

@@ -10,6 +10,7 @@ const navigationItems: NavigationItem[] = [
   { title: "Map View", icon: "map", href: "/map" },
   { title: "Methodologies", icon: "book", href: "/methodologies" },
   { title: "Users", icon: "people", href: "/users" },
+  { title: "Certificate Verification", icon: "verified", href: "/verify-certificate" },
   { title: "Settings", icon: "settings", href: "/settings" },
 ];
 

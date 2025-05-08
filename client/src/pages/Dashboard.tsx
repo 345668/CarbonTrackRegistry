@@ -27,6 +27,12 @@ export default function Dashboard() {
                 View All Projects
               </Button>
             </Link>
+            <Link href="/verify-certificate">
+              <Button variant="outline" className="inline-flex items-center gap-1.5 shadow-sm">
+                <span className="material-icons text-sm">verified</span>
+                Verify Certificate
+              </Button>
+            </Link>
             <Link href="/projects/new">
               <Button className="inline-flex items-center gap-1.5 shadow-sm">
                 <span className="material-icons text-sm">add</span>
