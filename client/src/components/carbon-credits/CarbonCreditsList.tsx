@@ -138,7 +138,7 @@ export default function CarbonCreditsList({ credits }: CarbonCreditsListProps) {
   if (credits.length === 0) {
     return (
       <div className="bg-white rounded-lg p-8 text-center">
-        <span className="material-icons text-5xl text-neutral-300 mb-2">account_balance_wallet</span>
+        <Banknote className="h-12 w-12 text-neutral-300 mx-auto mb-2" />
         <h3 className="text-lg font-medium text-neutral-900 mb-2">No Carbon Credits Found</h3>
         <p className="text-neutral-500 mb-4">There are no carbon credits matching your criteria</p>
       </div>
