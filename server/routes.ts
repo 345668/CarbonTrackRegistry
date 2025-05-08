@@ -13,7 +13,8 @@ import {
   insertVerificationCommentSchema,
   insertCarbonCreditSchema,
   insertActivityLogSchema,
-  insertStatisticsSchema
+  insertStatisticsSchema,
+  insertCorrespondingAdjustmentSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -752,6 +753,156 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(stats);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch statistics" });
+    }
+  });
+  
+  // Corresponding Adjustments API (Paris Agreement Article 6)
+  app.get("/api/adjustments", async (req, res) => {
+    try {
+      const { status, country, isHost } = req.query;
+      
+      if (status) {
+        const adjustments = await storage.listCorrespondingAdjustmentsByStatus(status as string);
+        return res.json(adjustments);
+      }
+      
+      if (country) {
+        const adjustments = await storage.listCorrespondingAdjustmentsByCountry(
+          country as string,
+          isHost === 'true'
+        );
+        return res.json(adjustments);
+      }
+      
+      const adjustments = await storage.listCorrespondingAdjustments();
+      res.json(adjustments);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch corresponding adjustments" });
+    }
+  });
+  
+  app.get("/api/adjustments/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const adjustment = await storage.getCorrespondingAdjustment(id);
+      
+      if (!adjustment) {
+        return res.status(404).json({ error: "Corresponding adjustment not found" });
+      }
+      
+      res.json(adjustment);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch corresponding adjustment" });
+    }
+  });
+  
+  app.get("/api/credits/:id/adjustments", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const adjustments = await storage.getCorrespondingAdjustmentsByCreditId(id);
+      res.json(adjustments);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch corresponding adjustments for credit" });
+    }
+  });
+  
+  app.post("/api/adjustments", async (req, res) => {
+    try {
+      const adjustmentData = insertCorrespondingAdjustmentSchema.parse(req.body);
+      const adjustment = await storage.createCorrespondingAdjustment(adjustmentData);
+      
+      // Log the activity
+      await storage.createActivityLog({
+        action: "adjustment_created",
+        description: `Corresponding adjustment created for credit ${adjustment.creditSerialNumber} between ${adjustment.hostCountry} and ${adjustment.recipientCountry || "unknown"}`,
+        entityType: "adjustment",
+        entityId: adjustment.id.toString(),
+        userId: req.user?.id || 1
+      });
+      
+      res.status(201).json(adjustment);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create corresponding adjustment" });
+    }
+  });
+  
+  app.patch("/api/adjustments/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const adjustment = await storage.getCorrespondingAdjustment(id);
+      
+      if (!adjustment) {
+        return res.status(404).json({ error: "Corresponding adjustment not found" });
+      }
+      
+      const updateSchema = insertCorrespondingAdjustmentSchema.partial();
+      const updateData = updateSchema.parse(req.body);
+      
+      const updatedAdjustment = await storage.updateCorrespondingAdjustment(id, updateData);
+      
+      // Log the update
+      await storage.createActivityLog({
+        action: "adjustment_updated",
+        description: `Corresponding adjustment updated for credit ${adjustment.creditSerialNumber}`,
+        entityType: "adjustment",
+        entityId: adjustment.id.toString(),
+        userId: req.user?.id || 1
+      });
+      
+      res.json(updatedAdjustment);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update corresponding adjustment" });
+    }
+  });
+  
+  // Update credit's Paris Agreement compliance fields
+  app.patch("/api/credits/:id/paris-compliance", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const credit = await storage.getCarbonCredit(id);
+      
+      if (!credit) {
+        return res.status(404).json({ error: "Carbon credit not found" });
+      }
+      
+      // Validate Paris Agreement data
+      const parisComplianceSchema = z.object({
+        parisAgreementEligible: z.boolean().optional(),
+        hostCountry: z.string().optional(),
+        correspondingAdjustmentStatus: z.enum(["pending", "approved", "rejected"]).optional(),
+        correspondingAdjustmentDetails: z.string().optional(),
+        internationalTransfer: z.boolean().optional(),
+        mitigationOutcome: z.string().optional(),
+        authorizationReference: z.string().optional(),
+        authorizationDate: z.string().optional(),
+      });
+      
+      const complianceData = parisComplianceSchema.parse(req.body);
+      
+      // Update the credit
+      const updatedCredit = await storage.updateCarbonCredit(id, complianceData);
+      
+      // Log the update
+      await storage.createActivityLog({
+        action: "paris_compliance_updated",
+        description: `Paris Agreement compliance data updated for credit ${credit.serialNumber}`,
+        entityType: "credit",
+        entityId: credit.serialNumber,
+        userId: req.user?.id || 1
+      });
+      
+      res.json(updatedCredit);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update Paris Agreement compliance data" });
     }
   });
 

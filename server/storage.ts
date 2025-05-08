@@ -34,7 +34,10 @@ import {
   type InsertActivityLog,
   statistics,
   type Statistics,
-  type InsertStatistics
+  type InsertStatistics,
+  correspondingAdjustments,
+  type CorrespondingAdjustment,
+  type InsertCorrespondingAdjustment
 } from "@shared/schema";
 
 import { eq, desc, like, sql, and, or } from "drizzle-orm";
@@ -483,6 +486,56 @@ export class DatabaseStorage implements IStorage {
       .where(eq(statistics.id, currentStats.id))
       .returning();
     return updatedStats || undefined;
+  }
+
+  // Corresponding Adjustment operations
+  async getCorrespondingAdjustment(id: number): Promise<CorrespondingAdjustment | undefined> {
+    const [adjustment] = await db.select().from(correspondingAdjustments).where(eq(correspondingAdjustments.id, id));
+    return adjustment || undefined;
+  }
+
+  async getCorrespondingAdjustmentsByCreditId(creditId: number): Promise<CorrespondingAdjustment[]> {
+    return await db.select().from(correspondingAdjustments).where(eq(correspondingAdjustments.creditId, creditId));
+  }
+
+  async getCorrespondingAdjustmentsBySerialNumber(serialNumber: string): Promise<CorrespondingAdjustment[]> {
+    return await db.select().from(correspondingAdjustments).where(eq(correspondingAdjustments.creditSerialNumber, serialNumber));
+  }
+
+  async createCorrespondingAdjustment(adjustment: InsertCorrespondingAdjustment): Promise<CorrespondingAdjustment> {
+    const [newAdjustment] = await db
+      .insert(correspondingAdjustments)
+      .values(adjustment)
+      .returning();
+    return newAdjustment;
+  }
+
+  async updateCorrespondingAdjustment(id: number, adjustment: Partial<InsertCorrespondingAdjustment>): Promise<CorrespondingAdjustment | undefined> {
+    const [updatedAdjustment] = await db
+      .update(correspondingAdjustments)
+      .set({
+        ...adjustment,
+        updatedAt: new Date(),
+      })
+      .where(eq(correspondingAdjustments.id, id))
+      .returning();
+    return updatedAdjustment || undefined;
+  }
+
+  async listCorrespondingAdjustments(): Promise<CorrespondingAdjustment[]> {
+    return await db.select().from(correspondingAdjustments);
+  }
+
+  async listCorrespondingAdjustmentsByStatus(status: string): Promise<CorrespondingAdjustment[]> {
+    return await db.select().from(correspondingAdjustments).where(eq(correspondingAdjustments.adjustmentStatus, status));
+  }
+
+  async listCorrespondingAdjustmentsByCountry(country: string, isHost: boolean): Promise<CorrespondingAdjustment[]> {
+    if (isHost) {
+      return await db.select().from(correspondingAdjustments).where(eq(correspondingAdjustments.hostCountry, country));
+    } else {
+      return await db.select().from(correspondingAdjustments).where(eq(correspondingAdjustments.recipientCountry, country));
+    }
   }
 }
 
