@@ -238,8 +238,10 @@ export const insertCarbonCreditSchema = createInsertSchema(carbonCredits).pick({
   owner: true,
   transferRecipient: true,
   transferPurpose: true,
+  transferDate: true,
   retirementPurpose: true,
   retirementBeneficiary: true,
+  retirementDate: true,
 });
 
 export type InsertCarbonCredit = z.infer<typeof insertCarbonCreditSchema>;

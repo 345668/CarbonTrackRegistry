@@ -657,7 +657,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "transferred",
         transferRecipient: recipient,
         transferPurpose: purpose,
-        transferDate: new Date().toISOString(),
       });
       
       // Log the transfer
@@ -707,7 +706,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "retired",
         retirementPurpose: purpose,
         retirementBeneficiary: beneficiary,
-        retirementDate: new Date().toISOString(),
       });
       
       // Log the retirement
