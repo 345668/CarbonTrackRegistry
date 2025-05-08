@@ -1,363 +1,350 @@
 import PDFDocument from 'pdfkit';
 import QRCode from 'qrcode';
-import { Project, CarbonCredit } from '@shared/schema';
 import { Readable } from 'stream';
+import { Project, CarbonCredit } from '@shared/schema';
+import { Response } from 'express';
+
+// Define certificate types
+type CertificateType = 'project' | 'credit';
+
+// Certificate data interfaces
+export interface ProjectCertificateData {
+  project: Project;
+  verificationId?: string;
+  issuedOn: Date;
+}
+
+export interface CreditCertificateData {
+  credit: CarbonCredit;
+  projectName: string;
+  issuedOn: Date;
+}
+
+export type CertificateData = ProjectCertificateData | CreditCertificateData;
 
 /**
- * Generate a project verification certificate
+ * Generates a verification URL for QR code
+ * @param type Certificate type
+ * @param id ID of the project or credit
+ * @param verificationId Optional verification ID for projects
  */
-export async function generateProjectCertificate(
-  project: Project, 
-  verificationId: number
-): Promise<Buffer> {
-  const doc = new PDFDocument({
-    size: 'A4',
-    margin: 50,
-    info: {
-      Title: `Project Verification Certificate - ${project.projectId}`,
-      Author: 'Radical Zero GmbH Carbon Registry',
-      Subject: 'Carbon Project Verification Certificate',
-      Keywords: 'carbon, project, verification, certificate',
-    },
-  });
-
-  // Collect the PDF data chunks
-  const chunks: Buffer[] = [];
-  doc.on('data', (chunk) => chunks.push(chunk));
-
-  // Create a promise to wait for the PDF to finish building
-  const pdfPromise = new Promise<Buffer>((resolve) => {
-    doc.on('end', () => {
-      resolve(Buffer.concat(chunks));
-    });
-  });
-
-  // Set up base font styles
-  doc.font('Helvetica');
+function getVerificationUrl(
+  type: CertificateType,
+  id: string,
+  verificationId?: string
+): string {
+  // Base URL from environment or default to localhost in development
+  const baseUrl = process.env.BASE_URL || 'http://localhost:5000';
   
-  // Generate verification URL and QR code
-  const verificationUrl = `${process.env.APP_URL || 'https://registry.radicalzero.io'}/verify-certificate?type=project&id=${project.projectId}&verificationId=${verificationId}`;
-  const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, {
-    errorCorrectionLevel: 'H',
-    margin: 1,
-    width: 150
-  });
-
-  // Add certificate header
-  doc.fontSize(24)
-     .font('Helvetica-Bold')
-     .fillColor('#1a365d')
-     .text('PROJECT VERIFICATION CERTIFICATE', { align: 'center' });
+  // Construct query parameters
+  const params = new URLSearchParams();
+  params.append('type', type);
+  params.append('id', id);
   
-  // Add logo (using a placeholder here - you would need to add your actual logo file)
-  // doc.image('path/to/logo.png', doc.page.width / 2 - 100, 100, { width: 200 });
+  if (type === 'project' && verificationId) {
+    params.append('verificationId', verificationId);
+  }
   
-  // Add certificate border
-  doc.rect(50, 50, doc.page.width - 100, doc.page.height - 100)
-     .strokeColor('#3b82f6')
-     .lineWidth(3)
-     .stroke();
-  
-  // Add QR code
-  doc.image(qrCodeDataUrl, doc.page.width - 180, 100, { width: 120 });
-  
-  // Add certificate details
-  doc.moveDown(5)
-     .fontSize(12)
-     .font('Helvetica')
-     .fillColor('#000000')
-     .text('This is to certify that the carbon offset project:', { align: 'center' })
-     .moveDown(1);
-  
-  doc.fontSize(16)
-     .font('Helvetica-Bold')
-     .fillColor('#1a365d')
-     .text(project.name, { align: 'center' })
-     .moveDown(0.5);
-  
-  doc.fontSize(14)
-     .font('Helvetica')
-     .fillColor('#000000')
-     .text(`Project ID: ${project.projectId}`, { align: 'center' })
-     .moveDown(2);
-  
-  doc.fontSize(12)
-     .text('Has successfully completed the verification process and meets the requirements of:', { align: 'center' })
-     .moveDown(1);
-  
-  doc.fontSize(14)
-     .font('Helvetica-Bold')
-     .text('Radical Zero GmbH Carbon Registry Standards', { align: 'center' })
-     .moveDown(0.5);
-  
-  doc.fontSize(12)
-     .font('Helvetica')
-     .text(`Methodology: ${project.methodology || 'N/A'}`, { align: 'center' })
-     .moveDown(0.5)
-     .text(`Category: ${project.category || 'N/A'}`, { align: 'center' })
-     .moveDown(0.5)
-     .text(`Location: ${project.location || 'N/A'}`, { align: 'center' })
-     .moveDown(2);
-  
-  // Add certification details
-  doc.fontSize(12)
-     .text(`Verification Date: ${new Date().toLocaleDateString()}`, { align: 'center' })
-     .moveDown(0.5)
-     .text(`Certificate ID: VER-${project.projectId}-${verificationId}`, { align: 'center' })
-     .moveDown(0.5)
-     .text(`Verification Period: ${project.startDate ? new Date(project.startDate).toLocaleDateString() : 'N/A'} to ${project.endDate ? new Date(project.endDate).toLocaleDateString() : 'N/A'}`, { align: 'center' })
-     .moveDown(2);
-  
-  // Add signature line
-  doc.moveTo(150, doc.y + 50)
-     .lineTo(doc.page.width - 150, doc.y + 50)
-     .stroke();
-  
-  doc.moveDown(0.5)
-     .text('Authorized Signature', { align: 'center' })
-     .moveDown(1);
-  
-  // Add verification note
-  doc.fontSize(10)
-     .fillColor('#64748b')
-     .text('Verify this certificate by scanning the QR code or visiting:', { align: 'center' })
-     .moveDown(0.5)
-     .text(verificationUrl, { align: 'center', link: verificationUrl, underline: true })
-     .moveDown(2);
-  
-  // Add footer
-  doc.fontSize(8)
-     .fillColor('#94a3b8')
-     .text('This certificate is electronically generated and does not require a physical signature.', { align: 'center' })
-     .moveDown(0.5)
-     .text('© ' + new Date().getFullYear() + ' Radical Zero GmbH. All rights reserved.', { align: 'center' });
-  
-  // Finalize the PDF
-  doc.end();
-
-  // Wait for the PDF to finish building and return the buffer
-  return pdfPromise;
+  return `${baseUrl}/verify-certificate?${params.toString()}`;
 }
 
 /**
- * Generate a carbon credit certificate
+ * Generates a QR code as data URL
+ * @param url URL to encode in QR code
  */
-export async function generateCreditCertificate(credit: CarbonCredit): Promise<Buffer> {
-  const doc = new PDFDocument({
-    size: 'A4',
-    margin: 50,
-    info: {
-      Title: `Carbon Credit Certificate - ${credit.serialNumber}`,
-      Author: 'Radical Zero GmbH Carbon Registry',
-      Subject: 'Carbon Credit Certificate',
-      Keywords: 'carbon, credit, certificate',
-    },
-  });
-
-  // Collect the PDF data chunks
-  const chunks: Buffer[] = [];
-  doc.on('data', (chunk) => chunks.push(chunk));
-
-  // Create a promise to wait for the PDF to finish building
-  const pdfPromise = new Promise<Buffer>((resolve) => {
-    doc.on('end', () => {
-      resolve(Buffer.concat(chunks));
+async function generateQRCode(url: string): Promise<string> {
+  try {
+    // Generate QR code as data URL
+    return await QRCode.toDataURL(url, {
+      errorCorrectionLevel: 'H',
+      margin: 1,
+      width: 200,
+      color: {
+        dark: '#000000', // Black dots
+        light: '#ffffff', // White background
+      },
     });
-  });
-
-  // Set up base font styles
-  doc.font('Helvetica');
-  
-  // Generate verification URL and QR code
-  const verificationUrl = `${process.env.APP_URL || 'https://registry.radicalzero.io'}/verify-certificate?type=credit&id=${credit.serialNumber}`;
-  const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, {
-    errorCorrectionLevel: 'H',
-    margin: 1,
-    width: 150
-  });
-
-  // Add certificate header
-  doc.fontSize(24)
-     .font('Helvetica-Bold')
-     .fillColor('#1a365d')
-     .text('CARBON CREDIT CERTIFICATE', { align: 'center' });
-  
-  // Add certificate border
-  doc.rect(50, 50, doc.page.width - 100, doc.page.height - 100)
-     .strokeColor('#10b981')
-     .lineWidth(3)
-     .stroke();
-  
-  // Add QR code
-  doc.image(qrCodeDataUrl, doc.page.width - 180, 100, { width: 120 });
-  
-  // Add certificate details
-  doc.moveDown(5)
-     .fontSize(12)
-     .font('Helvetica')
-     .fillColor('#000000')
-     .text('This certificate represents:', { align: 'center' })
-     .moveDown(1);
-  
-  doc.fontSize(16)
-     .font('Helvetica-Bold')
-     .fillColor('#065f46')
-     .text(`${credit.quantity} Metric Tonnes CO₂e`, { align: 'center' })
-     .moveDown(0.5);
-  
-  doc.fontSize(14)
-     .font('Helvetica')
-     .fillColor('#000000')
-     .text(`Serial Number: ${credit.serialNumber}`, { align: 'center' })
-     .moveDown(0.5)
-     .text(`Project ID: ${credit.projectId}`, { align: 'center' })
-     .moveDown(2);
-  
-  // Add credit details table
-  const startY = doc.y;
-  const textOptions = { width: 250 };
-  
-  // Left Column
-  doc.fontSize(12)
-     .font('Helvetica-Bold')
-     .text('Credit Details', doc.x, startY, textOptions);
-  
-  doc.moveDown(0.5)
-     .font('Helvetica-Bold')
-     .text('Vintage:', textOptions)
-     .moveUp()
-     .font('Helvetica')
-     .text(credit.vintage || 'N/A', doc.x + 100, doc.y, textOptions);
-  
-  doc.moveDown(0.5)
-     .font('Helvetica-Bold')
-     .text('Status:', textOptions)
-     .moveUp()
-     .font('Helvetica')
-     .text(credit.status || 'N/A', doc.x + 100, doc.y, textOptions);
-  
-  doc.moveDown(0.5)
-     .font('Helvetica-Bold')
-     .text('Issuance Date:', textOptions)
-     .moveUp()
-     .font('Helvetica')
-     .text(credit.issuanceDate ? new Date(credit.issuanceDate).toLocaleDateString() : 'N/A', doc.x + 100, doc.y, textOptions);
-  
-  // Right Column
-  doc.fontSize(12)
-     .font('Helvetica-Bold')
-     .text('Current Owner:', doc.x + 250, startY, textOptions)
-     .moveDown(0.5)
-     .font('Helvetica')
-     .text(credit.owner || 'N/A', textOptions);
-  
-  // Add Paris Agreement information if applicable
-  doc.moveDown(2)
-     .font('Helvetica-Bold')
-     .text('Paris Agreement Compliance', { align: 'left' })
-     .moveDown(0.5);
-  
-  if (credit.parisAgreementEligible) {
-    doc.font('Helvetica')
-       .text('This credit is eligible for use under Paris Agreement Article 6 mechanisms.', textOptions)
-       .moveDown(0.5);
-    
-    if (credit.hostCountry) {
-      doc.text(`Host Country: ${credit.hostCountry}`, textOptions)
-         .moveDown(0.5);
-    }
-    
-    if (credit.correspondingAdjustmentStatus) {
-      doc.text(`Corresponding Adjustment Status: ${credit.correspondingAdjustmentStatus}`, textOptions)
-         .moveDown(0.5);
-    }
-    
-    if (credit.mitigationOutcome) {
-      doc.text(`Mitigation Outcome: ${credit.mitigationOutcome}`, textOptions)
-         .moveDown(0.5);
-    }
-  } else {
-    doc.font('Helvetica')
-       .text('This credit is not eligible for use under Paris Agreement Article 6 mechanisms.', textOptions)
-       .moveDown(0.5);
+  } catch (error) {
+    console.error('Error generating QR code:', error);
+    throw new Error('Failed to generate QR code');
   }
-  
-  // Add credit information
-  if (credit.status === 'retired') {
-    doc.moveDown(1)
-       .font('Helvetica-Bold')
-       .fillColor('#b91c1c')
-       .text('RETIRED', { align: 'center' })
-       .font('Helvetica')
-       .fillColor('#000000')
-       .moveDown(0.5)
-       .text(`Retirement Date: ${credit.retirementDate ? new Date(credit.retirementDate).toLocaleDateString() : 'N/A'}`, { align: 'center' })
-       .moveDown(0.5);
-    
-    if (credit.retirementPurpose) {
-      doc.text(`Purpose: ${credit.retirementPurpose}`, { align: 'center' })
-         .moveDown(0.5);
-    }
-    
-    if (credit.retirementBeneficiary) {
-      doc.text(`Beneficiary: ${credit.retirementBeneficiary}`, { align: 'center' })
-         .moveDown(0.5);
-    }
-  } else if (credit.status === 'transferred') {
-    doc.moveDown(1)
-       .font('Helvetica-Bold')
-       .fillColor('#1d4ed8')
-       .text('TRANSFERRED', { align: 'center' })
-       .font('Helvetica')
-       .fillColor('#000000')
-       .moveDown(0.5)
-       .text(`Transfer Date: ${credit.transferDate ? new Date(credit.transferDate).toLocaleDateString() : 'N/A'}`, { align: 'center' })
-       .moveDown(0.5);
-    
-    if (credit.transferRecipient) {
-      doc.text(`Recipient: ${credit.transferRecipient}`, { align: 'center' })
-         .moveDown(0.5);
-    }
-  }
-  
-  // Add signature line
-  doc.moveDown(2)
-     .moveTo(150, doc.y + 50)
-     .lineTo(doc.page.width - 150, doc.y + 50)
-     .stroke();
-  
-  doc.moveDown(0.5)
-     .text('Authorized Signature', { align: 'center' })
-     .moveDown(1);
-  
-  // Add verification note
-  doc.fontSize(10)
-     .fillColor('#64748b')
-     .text('Verify this certificate by scanning the QR code or visiting:', { align: 'center' })
-     .moveDown(0.5)
-     .text(verificationUrl, { align: 'center', link: verificationUrl, underline: true })
-     .moveDown(1);
-  
-  // Add footer
-  doc.fontSize(8)
-     .fillColor('#94a3b8')
-     .text('This certificate is electronically generated and does not require a physical signature.', { align: 'center' })
-     .moveDown(0.5)
-     .text('© ' + new Date().getFullYear() + ' Radical Zero GmbH. All rights reserved.', { align: 'center' });
-  
-  // Finalize the PDF
-  doc.end();
-
-  // Wait for the PDF to finish building and return the buffer
-  return pdfPromise;
 }
 
 /**
- * Create a readable stream from a buffer
+ * Format a date as DD/MM/YYYY
+ * @param date Date to format
  */
-export function bufferToStream(buffer: Buffer): Readable {
-  const stream = new Readable();
-  stream.push(buffer);
-  stream.push(null);
-  return stream;
+function formatDate(date: Date): string {
+  return new Date(date).toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
+
+/**
+ * Generate a certificate for a project or carbon credit
+ * @param type Certificate type (project or credit)
+ * @param data Certificate data
+ * @param res Express response to pipe PDF to
+ */
+export async function generateCertificate(
+  type: CertificateType,
+  data: CertificateData,
+  res: Response
+): Promise<void> {
+  try {
+    // Create PDF document
+    const doc = new PDFDocument({
+      size: 'A4',
+      margins: { top: 50, bottom: 50, left: 50, right: 50 },
+      info: {
+        Title: `${type === 'project' ? 'Project' : 'Carbon Credit'} Certificate`,
+        Author: 'Radical Zero Carbon Registry',
+        Subject: `Certificate of ${type === 'project' ? 'Registration' : 'Issuance'}`,
+        Keywords: 'carbon, climate, certificate, offset',
+        CreationDate: new Date(),
+      },
+    });
+
+    // Set response headers
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=${type}-certificate-${
+        type === 'project'
+          ? (data as ProjectCertificateData).project.projectId
+          : (data as CreditCertificateData).credit.serialNumber
+      }.pdf`
+    );
+
+    // Pipe PDF to response
+    doc.pipe(res);
+
+    // Create common styles
+    const titleFont = 'Helvetica-Bold';
+    const bodyFont = 'Helvetica';
+    const titleSize = 24;
+    const subtitleSize = 18;
+    const headingSize = 14;
+    const bodySize = 12;
+    const smallSize = 10;
+    const lineGap = 12;
+    
+    // Add a decorative border
+    doc.rect(20, 20, doc.page.width - 40, doc.page.height - 40)
+      .lineWidth(1)
+      .strokeColor('#5b67f8')
+      .stroke();
+    
+    // Add Radical Zero logo
+    // Note: In a real implementation, you would load the logo from a file
+    // For now, we'll create a simple text representation
+    doc.fontSize(28)
+      .font(titleFont)
+      .fillColor('#5b67f8')
+      .text('RADICAL ZERO', { align: 'center' });
+      
+    doc.fontSize(16)
+      .font(bodyFont)
+      .fillColor('#444')
+      .text('CARBON REGISTRY', { align: 'center' });
+    
+    // Add certificate title
+    doc.moveDown(2);
+    doc.fontSize(titleSize)
+      .font(titleFont)
+      .fillColor('#000')
+      .text('CERTIFICATE', { align: 'center' });
+      
+    doc.moveDown(0.5);
+    doc.fontSize(subtitleSize)
+      .font(bodyFont)
+      .fillColor('#444')
+      .text(
+        type === 'project'
+          ? 'Project Registration'
+          : 'Carbon Credit Issuance',
+        { align: 'center' }
+      );
+    
+    doc.moveDown(1.5);
+    
+    // Certificate content varies by type
+    if (type === 'project') {
+      const { project, verificationId, issuedOn } = data as ProjectCertificateData;
+      
+      // Project details
+      doc.fontSize(headingSize)
+        .font(titleFont)
+        .fillColor('#000')
+        .text('PROJECT DETAILS', { align: 'left' });
+      
+      doc.moveDown(0.5);
+      doc.fontSize(bodySize)
+        .font(bodyFont)
+        .fillColor('#333');
+        
+      const details = [
+        { label: 'Project Name:', value: project.name },
+        { label: 'Project ID:', value: project.projectId },
+        { label: 'Developer:', value: project.developer },
+        { label: 'Location:', value: project.location },
+        { label: 'Category:', value: project.category },
+        { label: 'Methodology:', value: project.methodology },
+        { label: 'Registration Date:', value: formatDate(issuedOn) },
+      ];
+      
+      details.forEach(({ label, value }) => {
+        doc.text(`${label} ${value}`, { continued: false, lineGap });
+      });
+      
+      // Add verification details if available
+      if (verificationId) {
+        doc.moveDown(1);
+        doc.fontSize(headingSize)
+          .font(titleFont)
+          .fillColor('#000')
+          .text('VERIFICATION DETAILS', { align: 'left' });
+        
+        doc.moveDown(0.5);
+        doc.fontSize(bodySize)
+          .font(bodyFont)
+          .fillColor('#333')
+          .text(`Verification ID: ${verificationId}`, { lineGap });
+      }
+      
+    } else {
+      const { credit, projectName, issuedOn } = data as CreditCertificateData;
+      
+      // Credit details
+      doc.fontSize(headingSize)
+        .font(titleFont)
+        .fillColor('#000')
+        .text('CARBON CREDIT DETAILS', { align: 'left' });
+      
+      doc.moveDown(0.5);
+      doc.fontSize(bodySize)
+        .font(bodyFont)
+        .fillColor('#333');
+        
+      const details = [
+        { label: 'Serial Number:', value: credit.serialNumber },
+        { label: 'Project:', value: projectName },
+        { label: 'Project ID:', value: credit.projectId },
+        { label: 'Quantity:', value: `${credit.quantity} tCO₂e` },
+        { label: 'Vintage Year:', value: credit.vintage },
+        { label: 'Issuance Date:', value: formatDate(issuedOn) },
+        { label: 'Status:', value: credit.status },
+        { label: 'Current Owner:', value: credit.owner },
+      ];
+      
+      details.forEach(({ label, value }) => {
+        doc.text(`${label} ${value}`, { continued: false, lineGap });
+      });
+    }
+    
+    // Add Paris Agreement compliance statement if applicable
+    // This would typically be conditional based on credit properties
+    if (type === 'credit') {
+      const { credit } = data as CreditCertificateData;
+      
+      if (credit.correspondingAdjustmentStatus === 'completed') {
+        doc.moveDown(1);
+        doc.fontSize(headingSize)
+          .font(titleFont)
+          .fillColor('#000')
+          .text('PARIS AGREEMENT COMPLIANCE', { align: 'left' });
+        
+        doc.moveDown(0.5);
+        doc.fontSize(bodySize)
+          .font(bodyFont)
+          .fillColor('#333')
+          .text('This carbon credit is compliant with Paris Agreement Article 6 requirements. A corresponding adjustment has been applied in the host country NDC accounting.', { lineGap });
+      }
+    }
+    
+    // Generate QR code
+    const verificationUrl = getVerificationUrl(
+      type,
+      type === 'project'
+        ? (data as ProjectCertificateData).project.projectId
+        : (data as CreditCertificateData).credit.serialNumber,
+      type === 'project' ? (data as ProjectCertificateData).verificationId : undefined
+    );
+    
+    const qrCodeDataUrl = await generateQRCode(verificationUrl);
+    
+    // Add verification section and QR code
+    doc.moveDown(2);
+    doc.fontSize(headingSize)
+      .font(titleFont)
+      .fillColor('#000')
+      .text('CERTIFICATE VERIFICATION', { align: 'left' });
+    
+    doc.moveDown(0.5);
+    doc.fontSize(bodySize)
+      .font(bodyFont)
+      .fillColor('#333')
+      .text(
+        'Scan the QR code or visit the URL below to verify the authenticity of this certificate:',
+        { lineGap }
+      );
+    
+    doc.fontSize(smallSize)
+      .fillColor('#5b67f8')
+      .text(verificationUrl, { lineGap: 5, underline: true });
+    
+    // Add QR code
+    doc.image(qrCodeDataUrl, {
+      fit: [150, 150],
+      align: 'center',
+      valign: 'center',
+    });
+    
+    // Add footer
+    const footerY = doc.page.height - 50;
+    doc.fontSize(smallSize)
+      .fillColor('#666')
+      .text(
+        'This certificate is issued by Radical Zero Carbon Registry.',
+        50,
+        footerY,
+        { align: 'center' }
+      );
+    doc.text(
+      `Certificate issued on ${formatDate(new Date())}`,
+      50,
+      footerY + 15,
+      { align: 'center' }
+    );
+    
+    // Finalize PDF
+    doc.end();
+    
+  } catch (error) {
+    console.error('Error generating certificate:', error);
+    res.status(500).send('Failed to generate certificate');
+  }
+}
+
+/**
+ * Convert a PDF document to a buffer for storage or processing
+ * @param doc PDFKit document
+ */
+export async function pdfToBuffer(doc: PDFKit.PDFDocument): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    
+    // Create a pass-through stream
+    const stream = new (require('stream').PassThrough)();
+    
+    doc.pipe(stream);
+    
+    stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+    stream.on('end', () => resolve(Buffer.concat(chunks)));
+    stream.on('error', (err) => reject(err));
+    
+    doc.end();
+  });
 }

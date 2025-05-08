@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { generateProjectCertificate, generateCreditCertificate } from "./utils/certificate-generator";
+import { generateCertificate } from "./utils/certificate-generator";
 import { 
   insertUserSchema,
   insertProjectCategorySchema,
@@ -779,9 +779,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Verification not found" });
       }
       
-      // Generate the certificate
-      const pdfBuffer = await generateProjectCertificate(project, verification.id);
-      
       // Create activity log
       await storage.createActivityLog({
         action: "certificate_generated",
@@ -791,13 +788,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: req.user?.id || 1
       });
       
-      // Set response headers for PDF download
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename=project-certificate-${projectId}.pdf`);
-      res.setHeader('Content-Length', pdfBuffer.length);
-      
-      // Send the PDF buffer
-      res.send(pdfBuffer);
+      // Generate the certificate
+      await generateCertificate('project', {
+        project,
+        verificationId: verification.id.toString(),
+        issuedOn: new Date()
+      }, res);
     } catch (error) {
       console.error("Error generating project certificate:", error);
       res.status(500).json({ error: "Failed to generate certificate" });
@@ -813,8 +809,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Carbon credit not found" });
       }
       
-      // Generate the certificate
-      const pdfBuffer = await generateCreditCertificate(credit);
+      // Get project name
+      let projectName = "Unknown Project";
+      const project = await storage.getProjectByProjectId(credit.projectId);
+      if (project) {
+        projectName = project.name;
+      }
       
       // Create activity log
       await storage.createActivityLog({
@@ -825,13 +825,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: req.user?.id || 1
       });
       
-      // Set response headers for PDF download
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename=credit-certificate-${serialNumber}.pdf`);
-      res.setHeader('Content-Length', pdfBuffer.length);
-      
-      // Send the PDF buffer
-      res.send(pdfBuffer);
+      // Generate the certificate
+      await generateCertificate('credit', {
+        credit,
+        projectName,
+        issuedOn: new Date()
+      }, res);
     } catch (error) {
       console.error("Error generating credit certificate:", error);
       res.status(500).json({ error: "Failed to generate certificate" });
