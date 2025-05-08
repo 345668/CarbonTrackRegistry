@@ -87,6 +87,28 @@ interface BlockchainConfig {
   lastUpdated: string;
 }
 
+// Define the corresponding adjustment type
+interface CorrespondingAdjustment {
+  id: number;
+  creditId: number;
+  creditSerialNumber: string;
+  hostCountry: string;
+  recipientCountry?: string;
+  adjustmentType: string;
+  adjustmentQuantity: number;
+  adjustmentStatus: string;
+  adjustmentDate?: string;
+  authorizedBy?: string;
+  verifiedBy?: string;
+  ndcTarget?: string;
+  mitigationOutcomeType?: string;
+  authorizationDocument?: string;
+  verificationDocument?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 // Define the config form schema
 const blockchainConfigSchema = z.object({
   enabled: z.boolean(),
@@ -125,6 +147,16 @@ export default function BlockchainPage() {
   } = useQuery<BlockchainConfig>({
     queryKey: ['/api/blockchain/config'],
     enabled: isAdmin,
+  });
+  
+  // Query for corresponding adjustments
+  const { 
+    data: adjustments, 
+    isLoading: adjustmentsLoading,
+    isError: adjustmentsError
+  } = useQuery<CorrespondingAdjustment[]>({
+    queryKey: ['/api/adjustments'],
+    enabled: true,
   });
 
   // Form for blockchain config
@@ -302,6 +334,10 @@ export default function BlockchainPage() {
             <Activity className="w-4 h-4" />
             Transactions
           </TabsTrigger>
+          <TabsTrigger value="paris-compliance" className="flex items-center gap-1.5">
+            <Check className="w-4 h-4" />
+            Paris Agreement
+          </TabsTrigger>
           {isAdmin && (
             <TabsTrigger value="configuration" className="flex items-center gap-1.5">
               <Settings className="w-4 h-4" />
@@ -363,6 +399,153 @@ export default function BlockchainPage() {
               ) : (
                 <div className="text-center py-12 text-neutral-500">
                   No blockchain records found
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="paris-compliance">
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Paris Agreement Article 6 Compliance</CardTitle>
+              <CardDescription>
+                Track corresponding adjustments for internationally transferred carbon credits
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {adjustmentsLoading ? (
+                <div className="flex justify-center items-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : adjustmentsError ? (
+                <div className="flex justify-center items-center py-12 text-destructive">
+                  Failed to load corresponding adjustments
+                </div>
+              ) : adjustments && adjustments.length > 0 ? (
+                <div className="space-y-6">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Credit Serial #</TableHead>
+                          <TableHead>Host Country</TableHead>
+                          <TableHead>Recipient Country</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Quantity</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>NDC Target</TableHead>
+                          <TableHead>Date</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {adjustments.map((adjustment) => (
+                          <TableRow key={adjustment.id}>
+                            <TableCell className="font-mono text-xs">
+                              {adjustment.creditSerialNumber}
+                            </TableCell>
+                            <TableCell>{adjustment.hostCountry}</TableCell>
+                            <TableCell>{adjustment.recipientCountry || '-'}</TableCell>
+                            <TableCell>{adjustment.adjustmentType}</TableCell>
+                            <TableCell>{adjustment.adjustmentQuantity.toLocaleString()}</TableCell>
+                            <TableCell>
+                              <Badge
+                                className={
+                                  adjustment.adjustmentStatus === "approved"
+                                    ? "bg-green-500"
+                                    : adjustment.adjustmentStatus === "pending"
+                                    ? "bg-yellow-500"
+                                    : adjustment.adjustmentStatus === "rejected"
+                                    ? "bg-red-500"
+                                    : "bg-blue-500"
+                                }
+                              >
+                                {adjustment.adjustmentStatus}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="max-w-[200px] truncate">
+                              {adjustment.ndcTarget || '-'}
+                            </TableCell>
+                            <TableCell>
+                              {adjustment.adjustmentDate
+                                ? format(new Date(adjustment.adjustmentDate), 'MMM d, yyyy')
+                                : 'N/A'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-lg">Paris Agreement Article 6</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div>
+                            <h4 className="font-medium">Cooperative Approaches</h4>
+                            <p className="text-sm text-neutral-600">
+                              Article 6.2 of the Paris Agreement allows countries to engage in voluntary 
+                              cooperation when implementing their NDCs through the use of internationally 
+                              transferred mitigation outcomes (ITMOs).
+                            </p>
+                          </div>
+                          <div>
+                            <h4 className="font-medium">Corresponding Adjustments</h4>
+                            <p className="text-sm text-neutral-600">
+                              To avoid double counting, when carbon credits are transferred internationally, 
+                              a corresponding adjustment must be applied to ensure the emission reduction 
+                              is only counted once toward the NDC of the receiving country.
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-lg">Compliance Statistics</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="border rounded-lg p-4">
+                              <h4 className="text-sm font-medium text-neutral-600">Total Adjustments</h4>
+                              <p className="text-2xl font-bold text-primary">
+                                {adjustments.length}
+                              </p>
+                            </div>
+                            <div className="border rounded-lg p-4">
+                              <h4 className="text-sm font-medium text-neutral-600">Total Volume</h4>
+                              <p className="text-2xl font-bold text-primary">
+                                {adjustments.reduce((sum, adj) => sum + adj.adjustmentQuantity, 0).toLocaleString()} tCO₂e
+                              </p>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="border rounded-lg p-4">
+                              <h4 className="text-sm font-medium text-neutral-600">Approved</h4>
+                              <p className="text-2xl font-bold text-green-500">
+                                {adjustments.filter(adj => adj.adjustmentStatus === "approved").length}
+                              </p>
+                            </div>
+                            <div className="border rounded-lg p-4">
+                              <h4 className="text-sm font-medium text-neutral-600">Pending</h4>
+                              <p className="text-2xl font-bold text-yellow-500">
+                                {adjustments.filter(adj => adj.adjustmentStatus === "pending").length}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12 text-neutral-500">
+                  No corresponding adjustments found
                 </div>
               )}
             </CardContent>
