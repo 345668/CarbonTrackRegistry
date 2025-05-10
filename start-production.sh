@@ -6,5 +6,12 @@ echo "Starting Carbon Registry in production mode..."
 # Set Node environment to production
 export NODE_ENV=production
 
-# Run the application
-node server/index.js
+# Check if compiled files exist
+if [ ! -f "dist/index.js" ]; then
+  echo "Building application for production..."
+  # Build the application (compiles TypeScript to JavaScript)
+  npm run build
+fi
+
+# Run the compiled application
+node dist/index.js
