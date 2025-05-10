@@ -156,8 +156,24 @@ export default function AuthPage() {
         {/* Auth form below the features */}
         <div className="w-full max-w-md">
           <Card className="bg-white/10 backdrop-blur-sm border-none">
+            <div className="flex justify-between mb-2 px-4 pt-4">
+              <Button 
+                variant={activeTab === "login" ? "default" : "ghost"} 
+                className={activeTab === "login" ? "bg-[#5b67f8]" : "text-gray-300 hover:text-white hover:bg-white/10"} 
+                onClick={() => setActiveTab("login")}
+              >
+                Login
+              </Button>
+              <Button 
+                variant={activeTab === "register" ? "default" : "ghost"} 
+                className={activeTab === "register" ? "bg-[#5b67f8]" : "text-gray-300 hover:text-white hover:bg-white/10"} 
+                onClick={() => setActiveTab("register")}
+              >
+                Register
+              </Button>
+            </div>
             <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab}>
-              <CardHeader className="pb-2">
+              <CardHeader className="pb-2 hidden">
                 <TabsList className="grid w-full grid-cols-2 bg-[#1a2053]">
                   <TabsTrigger value="login" className="data-[state=active]:bg-[#5b67f8]">Login</TabsTrigger>
                   <TabsTrigger value="register" className="data-[state=active]:bg-[#5b67f8]">Register</TabsTrigger>
@@ -168,35 +184,50 @@ export default function AuthPage() {
                 <TabsContent value="login">
                   <Form {...loginForm}>
                     <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
-                      <FormField
-                        control={loginForm.control}
-                        name="username"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-200">Username</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter your username" {...field} className="bg-white/20 border-0 text-white placeholder:text-gray-400" />
-                            </FormControl>
-                            <FormMessage className="text-red-300" />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={loginForm.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-200">Password</FormLabel>
-                            <FormControl>
-                              <Input type="password" placeholder="Enter your password" {...field} className="bg-white/20 border-0 text-white placeholder:text-gray-400" />
-                            </FormControl>
-                            <FormMessage className="text-red-300" />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="mb-4">
+                        <p className="text-white mb-1 text-sm">Username</p>
+                        <FormField
+                          control={loginForm.control}
+                          name="username"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input 
+                                  placeholder="Enter your username" 
+                                  {...field} 
+                                  className="bg-white/20 border-0 text-white placeholder:text-gray-400 h-10 rounded-md" 
+                                />
+                              </FormControl>
+                              <FormMessage className="text-red-300" />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      <div className="mb-6">
+                        <p className="text-white mb-1 text-sm">Password</p>
+                        <FormField
+                          control={loginForm.control}
+                          name="password"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input 
+                                  type="password" 
+                                  placeholder="Enter your password" 
+                                  {...field} 
+                                  className="bg-white/20 border-0 text-white placeholder:text-gray-400 h-10 rounded-md" 
+                                />
+                              </FormControl>
+                              <FormMessage className="text-red-300" />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
                       <Button
                         type="submit"
-                        className="w-full bg-[#5b67f8] hover:bg-[#4954d3] text-white"
+                        className="w-full bg-[#5b67f8] hover:bg-[#4954d3] text-white h-10 rounded-md"
                         disabled={loginMutation.isPending}
                       >
                         {loginMutation.isPending ? "Logging in..." : "Login"}

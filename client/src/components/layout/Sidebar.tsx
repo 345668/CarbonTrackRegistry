@@ -1,6 +1,8 @@
 import { useLocation, Link } from "wouter";
 import { cn } from "@/lib/utils";
 import { NavigationItem } from "@/types";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
 
 const navigationItems: NavigationItem[] = [
   { title: "Dashboard", icon: "dashboard", href: "/" },
@@ -18,7 +20,16 @@ const navigationItems: NavigationItem[] = [
 ];
 
 export default function Sidebar() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+  const { user, logoutMutation } = useAuth();
+
+  const handleSignOut = () => {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        setLocation("/auth");
+      }
+    });
+  };
 
   return (
     <div className="flex flex-col w-64 border-r border-gray-200 bg-white h-full">
@@ -65,15 +76,31 @@ export default function Sidebar() {
         </nav>
 
         <div className="px-4 py-3 border-t border-gray-200">
-          <div className="flex items-center">
-            <div className="h-9 w-9 rounded-full bg-primary-light flex items-center justify-center">
-              <span className="material-icons text-primary">person</span>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-neutral-900">Admin User</p>
-              <p className="text-xs text-neutral-500">Program Manager</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="h-9 w-9 rounded-full bg-primary-light flex items-center justify-center">
+                <span className="material-icons text-primary">person</span>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-neutral-900">
+                  {user?.fullName || "Admin User"}
+                </p>
+                <p className="text-xs text-neutral-500">
+                  {user?.role || "Program Manager"}
+                </p>
+              </div>
             </div>
           </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleSignOut}
+            className="w-full mt-2 text-red-600 hover:bg-red-50 hover:text-red-700 flex items-center justify-center"
+            disabled={logoutMutation.isPending}
+          >
+            <span className="material-icons mr-1 text-sm">logout</span>
+            {logoutMutation.isPending ? "Signing out..." : "Sign Out"}
+          </Button>
         </div>
       </div>
     </div>
