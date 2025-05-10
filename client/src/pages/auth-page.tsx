@@ -87,7 +87,7 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#00082d] text-white">
+    <div className="min-h-screen bg-[#00082d] text-white">
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Carbon tag icons */}
@@ -101,31 +101,63 @@ export default function AuthPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
           </svg>
         </div>
-        <div className="absolute top-1/3 right-1/6 transform -translate-x-1/2 -translate-y-1/2">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20 text-white opacity-10" viewBox="0 0 24 24" stroke="currentColor" fill="none">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-          </svg>
-        </div>
         <div className="absolute bottom-1/4 left-1/6 transform -translate-x-1/2 -translate-y-1/2">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-14 w-14 text-white opacity-10" viewBox="0 0 24 24" stroke="currentColor" fill="none">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
           </svg>
         </div>
-        <div className="absolute top-2/3 left-3/4 transform -translate-x-1/2 -translate-y-1/2">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-white opacity-10" viewBox="0 0 24 24" stroke="currentColor" fill="none">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-          </svg>
-        </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row w-full z-10">
-        {/* Left Column - Auth Forms */}
-        <div className="flex flex-1 items-center justify-center p-6 lg:p-12">
-          <Card className="w-full max-w-md bg-white/10 backdrop-blur-sm text-white border-none">
+      <div className="container mx-auto flex flex-col items-center pt-16 pb-20 px-4 z-10 relative">
+        {/* Logo with glow effect */}
+        <div className="mb-8 bg-white p-4 rounded-lg shadow-[0_0_40px_rgba(79,70,229,0.6)]">
+          <img src={RadicalZeroLogo} alt="Radical Zero Logo" className="h-16 sm:h-20" />
+        </div>
+        
+        {/* Title and description - centered */}
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4 text-center max-w-3xl">
+          Radical Zero Carbon Registry Platform
+        </h1>
+        
+        <p className="text-lg sm:text-xl mb-12 text-center max-w-3xl">
+          A comprehensive solution for registering, verifying, and tracking carbon offset projects
+          and credits. Help combat climate change by supporting sustainable initiatives and
+          monitoring their impact.
+        </p>
+        
+        {/* Feature list - centered with clean design */}
+        <div className="space-y-4 w-full max-w-lg mb-12">
+          <div className="flex items-center space-x-3 bg-white/10 p-4 rounded-lg">
+            <div className="bg-[#5b67f8] text-white p-1 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <p>Register and monitor carbon offset projects</p>
+          </div>
+          <div className="flex items-center space-x-3 bg-white/10 p-4 rounded-lg">
+            <div className="bg-[#5b67f8] text-white p-1 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <p>Track verification stages and project statuses</p>
+          </div>
+          <div className="flex items-center space-x-3 bg-white/10 p-4 rounded-lg">
+            <div className="bg-[#5b67f8] text-white p-1 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <p>Manage and transfer carbon credits</p>
+          </div>
+        </div>
+        
+        {/* Auth form below the features */}
+        <div className="w-full max-w-md">
+          <Card className="bg-white/10 backdrop-blur-sm border-none">
             <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab}>
-              <CardHeader>
-                <CardTitle className="text-2xl text-center mb-2">Carbon Registry Platform</CardTitle>
-                <CardDescription className="text-center mb-4 text-gray-300">Login or create an account to manage carbon projects</CardDescription>
+              <CardHeader className="pb-2">
                 <TabsList className="grid w-full grid-cols-2 bg-[#1a2053]">
                   <TabsTrigger value="login" className="data-[state=active]:bg-[#5b67f8]">Login</TabsTrigger>
                   <TabsTrigger value="register" className="data-[state=active]:bg-[#5b67f8]">Register</TabsTrigger>
@@ -291,53 +323,6 @@ export default function AuthPage() {
               </CardFooter>
             </Tabs>
           </Card>
-        </div>
-
-        {/* Right Column - Hero Section */}
-        <div className="flex flex-1 p-8 text-white flex-col justify-center relative overflow-hidden">
-          {/* Center logo and content */}
-          <div className="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
-            <div className="mb-8 bg-white p-4 rounded-lg shadow-[0_0_40px_rgba(79,70,229,0.6)]">
-              <img src={RadicalZeroLogo} alt="Radical Zero Logo" className="h-24" />
-            </div>
-            
-            <h1 className="text-4xl font-bold tracking-tight mb-4 text-center">
-              Radical Zero Carbon Registry Platform
-            </h1>
-            
-            <p className="text-xl mb-8 text-center">
-              A comprehensive solution for registering, verifying, and tracking carbon offset projects
-              and credits. Help combat climate change by supporting sustainable initiatives and
-              monitoring their impact.
-            </p>
-            
-            <div className="space-y-4 w-full max-w-md">
-              <div className="flex items-start space-x-3 bg-white/10 p-3 rounded-lg">
-                <div className="bg-[#5b67f8] text-white p-1 rounded-full mt-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <p className="text-sm">Register and monitor carbon offset projects</p>
-              </div>
-              <div className="flex items-start space-x-3 bg-white/10 p-3 rounded-lg">
-                <div className="bg-[#5b67f8] text-white p-1 rounded-full mt-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <p className="text-sm">Track verification stages and project statuses</p>
-              </div>
-              <div className="flex items-start space-x-3 bg-white/10 p-3 rounded-lg">
-                <div className="bg-[#5b67f8] text-white p-1 rounded-full mt-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <p className="text-sm">Manage and transfer carbon credits</p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
