@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
+import { RoleProtectedRoute } from "@/lib/role-protected-route";
 import { AnimatePresence } from "framer-motion";
 import { AnimatedRoute } from "@/components/ui/animated-route";
 import NotFound from "@/pages/not-found";
@@ -43,7 +44,11 @@ function Router() {
         <ProtectedRoute path="/users" component={Users} />
         <ProtectedRoute path="/settings" component={Settings} />
         <ProtectedRoute path="/blockchain" component={Blockchain} />
-        <ProtectedRoute path="/api-docs" component={ApiDocs} />
+        <RoleProtectedRoute 
+          path="/api-docs" 
+          component={ApiDocs} 
+          allowedRoles={['admin', 'developer']} 
+        />
         <AnimatedRoute path="/:rest*" component={NotFound} />
       </Switch>
     </AnimatePresence>

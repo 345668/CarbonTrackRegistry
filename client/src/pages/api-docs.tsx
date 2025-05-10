@@ -15,9 +15,12 @@ import {
   Code, 
   RefreshCw, 
   CheckCircle2, 
-  Layers 
+  Layers, 
+  ShieldAlert 
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
+import ApiKeyManagement from '@/components/api/ApiKeyManagement';
 
 // Example API response structure
 const apiResponseExample = {
