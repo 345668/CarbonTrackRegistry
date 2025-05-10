@@ -21,6 +21,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import ApiKeyManagement from '@/components/api/ApiKeyManagement';
+import { PageTitle } from '@/components/shared/PageTitle';
 
 // Example API response structure
 const apiResponseExample = {
@@ -167,8 +168,13 @@ const endpoints = [
 
 export default function ApiDocsPage() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [codeLanguage, setCodeLanguage] = useState('curl');
+  
+  // Check if user has developer or admin role
+  const isAdmin = user?.role === 'admin';
+  const isDeveloper = user?.role === 'developer';
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -180,6 +186,11 @@ export default function ApiDocsPage() {
 
   return (
     <div className="container mx-auto py-6">
+      <PageTitle 
+        title="API Documentation" 
+        description="Integrate with the Radical Zero Carbon Registry API for external systems and carbon markets" 
+      />
+      
       <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">API Documentation</h1>
@@ -195,6 +206,25 @@ export default function ApiDocsPage() {
             </Button>
           </a>
         </div>
+      </div>
+      
+      {/* Authorization Alert for non-developer/admin users */}
+      {!isAdmin && !isDeveloper && (
+        <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-8 rounded-md flex items-start">
+          <ShieldAlert className="h-6 w-6 text-amber-500 mr-3 flex-shrink-0 mt-0.5" />
+          <div>
+            <h3 className="font-medium text-amber-800">API Access Restricted</h3>
+            <p className="text-amber-700 mt-1">
+              You are viewing this documentation in read-only mode. To get API access and generate an API key, 
+              please request the developer or admin role. Use the form below to submit your access request.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* API Key Management Card */}
+      <div className="mb-8">
+        <ApiKeyManagement />
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
