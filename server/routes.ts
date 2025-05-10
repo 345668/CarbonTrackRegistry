@@ -27,6 +27,16 @@ import { z } from "zod";
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   
+  // Add health check endpoint for deployment monitoring
+  app.get('/health', (req, res) => {
+    res.status(200).json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV
+    });
+  });
+  
   // Set up authentication routes and middleware
   setupAuth(app);
   

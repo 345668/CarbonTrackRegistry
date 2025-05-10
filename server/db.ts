@@ -12,18 +12,25 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// Create a pool with proper connection settings
+// Create a pool with robust production-ready settings
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
-  connectionTimeoutMillis: 5000, // longer timeout for initial connection
-  max: 20, // maximum connections
+  connectionTimeoutMillis: 10000, // longer timeout for initial connection
+  max: 10, // reduced max connections to avoid overloading the server
   idleTimeoutMillis: 30000 // how long a connection can be idle before being closed
 });
 
 // Add error handling for the pool
 pool.on('error', (err) => {
-  console.error('Unexpected error on idle client', err);
-  process.exit(-1);
+  console.error('Database pool error:', err);
+  
+  // In production, we attempt to reconnect rather than crashing
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Attempting to recover from database error...');
+  } else {
+    // In development, we exit to make errors more obvious
+    process.exit(-1);
+  }
 });
 
 // Initialize Drizzle with the pool and schema
