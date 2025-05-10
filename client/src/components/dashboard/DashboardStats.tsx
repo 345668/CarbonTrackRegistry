@@ -53,6 +53,15 @@ export default function DashboardStats() {
       href: "/blockchain?tab=paris-compliance",
     },
     {
+      title: "Advanced Analytics",
+      value: "SDG Impact",
+      percentChange: 15,
+      icon: "insights",
+      color: "bg-cyan-500/10 text-cyan-600",
+      borderColor: "border-cyan-500/20",
+      href: "/analytics?tab=sdg",
+    },
+    {
       title: "Pending Verification",
       value: formatNumber(stats.pendingVerification),
       percentChange: -3,
@@ -63,7 +72,7 @@ export default function DashboardStats() {
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 mb-6">
       {statCards.map((card, index) => (
         <StatCardComponent key={index} {...card} />
       ))}
@@ -123,12 +132,14 @@ function DashboardStatsLoading() {
     "border-primary/20", 
     "border-blue-500/20", 
     "border-green-500/20", 
+    "border-purple-500/20",
+    "border-cyan-500/20",
     "border-amber-500/20"
   ];
   
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-      {[1, 2, 3, 4].map((i) => (
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 mb-6">
+      {[1, 2, 3, 4, 5, 6].map((i) => (
         <Card key={i} className={`shadow-sm ${colors[i-1]} border`}>
           <CardContent className="px-4 py-5 sm:p-6">
             <div className="flex items-center">

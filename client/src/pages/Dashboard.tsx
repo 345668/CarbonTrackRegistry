@@ -39,6 +39,12 @@ export default function Dashboard() {
                 Blockchain
               </Button>
             </Link>
+            <Link href="/analytics">
+              <Button variant="outline" className="inline-flex items-center gap-1.5 shadow-sm">
+                <span className="material-icons text-sm">insights</span>
+                Advanced Analytics
+              </Button>
+            </Link>
             <Link href="/api-docs">
               <Button variant="outline" className="inline-flex items-center gap-1.5 shadow-sm">
                 <span className="material-icons text-sm">api</span>
