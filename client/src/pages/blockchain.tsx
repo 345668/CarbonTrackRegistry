@@ -212,6 +212,57 @@ export default function BlockchainPage() {
     enabled: isAdmin,
   });
   
+  // Define sample adjustment data for demonstration
+  const sampleAdjustments: CorrespondingAdjustment[] = [
+    {
+      id: 1,
+      creditId: 1,
+      creditSerialNumber: 'VCS-001-2023-1001',
+      hostCountry: 'Brazil',
+      recipientCountry: 'Switzerland',
+      adjustmentType: 'ITMO',
+      adjustmentQuantity: 5000,
+      adjustmentStatus: 'approved',
+      adjustmentDate: '2023-07-15',
+      authorizedBy: 'UNFCCC',
+      verifiedBy: 'Gold Standard',
+      ndcTarget: 'Reforestation & Afforestation',
+      mitigationOutcomeType: 'Removal',
+      createdAt: '2023-07-10',
+    },
+    {
+      id: 2,
+      creditId: 2,
+      creditSerialNumber: 'GS-002-2023-3842',
+      hostCountry: 'Colombia',
+      recipientCountry: 'Norway',
+      adjustmentType: 'ITMO',
+      adjustmentQuantity: 3500,
+      adjustmentStatus: 'pending',
+      adjustmentDate: '2023-08-20',
+      authorizedBy: 'National Authority',
+      ndcTarget: 'Renewable Energy - Solar',
+      mitigationOutcomeType: 'Avoidance',
+      createdAt: '2023-08-15',
+    },
+    {
+      id: 3,
+      creditId: 3,
+      creditSerialNumber: 'CDM-003-2023-5472',
+      hostCountry: 'Kenya',
+      recipientCountry: 'Japan',
+      adjustmentType: 'CORSIA',
+      adjustmentQuantity: 2500,
+      adjustmentStatus: 'approved',
+      adjustmentDate: '2023-09-12',
+      authorizedBy: 'UNFCCC',
+      verifiedBy: 'Verra',
+      ndcTarget: 'Clean Cookstoves Program',
+      mitigationOutcomeType: 'Reduction',
+      createdAt: '2023-09-05',
+    }
+  ];
+  
   // Query for corresponding adjustments
   const { 
     data: adjustments, 
@@ -220,55 +271,7 @@ export default function BlockchainPage() {
   } = useQuery<CorrespondingAdjustment[]>({
     queryKey: ['/api/adjustments'],
     enabled: true,
-    placeholderData: [
-      {
-        id: 1,
-        creditId: 1,
-        creditSerialNumber: 'VCS-001-2023-1001',
-        hostCountry: 'Brazil',
-        recipientCountry: 'Switzerland',
-        adjustmentType: 'ITMO',
-        adjustmentQuantity: 5000,
-        adjustmentStatus: 'approved',
-        adjustmentDate: '2023-07-15',
-        authorizedBy: 'UNFCCC',
-        verifiedBy: 'Gold Standard',
-        ndcTarget: 'Reforestation & Afforestation',
-        mitigationOutcomeType: 'Removal',
-        createdAt: '2023-07-10',
-      },
-      {
-        id: 2,
-        creditId: 2,
-        creditSerialNumber: 'GS-002-2023-3842',
-        hostCountry: 'Colombia',
-        recipientCountry: 'Norway',
-        adjustmentType: 'ITMO',
-        adjustmentQuantity: 3500,
-        adjustmentStatus: 'pending',
-        adjustmentDate: '2023-08-20',
-        authorizedBy: 'National Authority',
-        ndcTarget: 'Renewable Energy - Solar',
-        mitigationOutcomeType: 'Avoidance',
-        createdAt: '2023-08-15',
-      },
-      {
-        id: 3,
-        creditId: 3,
-        creditSerialNumber: 'CDM-003-2023-5472',
-        hostCountry: 'Kenya',
-        recipientCountry: 'Japan',
-        adjustmentType: 'CORSIA',
-        adjustmentQuantity: 2500,
-        adjustmentStatus: 'approved',
-        adjustmentDate: '2023-09-12',
-        authorizedBy: 'UNFCCC',
-        verifiedBy: 'Verra',
-        ndcTarget: 'Clean Cookstoves Program',
-        mitigationOutcomeType: 'Reduction',
-        createdAt: '2023-09-05',
-      }
-    ]
+    select: (data) => data?.length ? data : sampleAdjustments
   });
 
   // Form for blockchain config
