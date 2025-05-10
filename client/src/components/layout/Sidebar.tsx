@@ -8,6 +8,7 @@ const navigationItems: NavigationItem[] = [
   { title: "Carbon Credits", icon: "account_balance_wallet", href: "/carbon-credits" },
   { title: "Verification", icon: "assignment_turned_in", href: "/verification" },
   { title: "Map View", icon: "map", href: "/map" },
+  { title: "Analytics", icon: "insights", href: "/analytics" },
   { title: "Methodologies", icon: "book", href: "/methodologies" },
   { title: "Blockchain", icon: "token", href: "/blockchain" },
   { title: "API Documentation", icon: "api", href: "/api-docs" },

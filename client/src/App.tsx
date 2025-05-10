@@ -24,6 +24,7 @@ import ProjectDetail from "./pages/ProjectDetail";
 import VerifyCertificate from "./pages/verify-certificate";
 import Blockchain from "./pages/blockchain";
 import ApiDocs from "./pages/api-docs";
+import Analytics from "./pages/Analytics";
 
 function Router() {
   const [location] = useLocation();
@@ -44,6 +45,7 @@ function Router() {
         <ProtectedRoute path="/users" component={Users} />
         <ProtectedRoute path="/settings" component={Settings} />
         <ProtectedRoute path="/blockchain" component={Blockchain} />
+        <ProtectedRoute path="/analytics" component={Analytics} />
         <RoleProtectedRoute 
           path="/api-docs" 
           component={ApiDocs} 
