@@ -2,64 +2,116 @@
 
 A cutting-edge carbon registry platform that revolutionizes carbon offset project management through comprehensive digital tools and advanced verification processes.
 
-## Key Features
+![Carbon Registry Platform](https://raw.githubusercontent.com/yourusername/carbon-registry/main/generated-icon.png)
 
-- **Project Registration & Management**: Track the complete lifecycle of carbon offset projects.
-- **Third-Party Verification System**: Robust verification workflow with document uploads, stage tracking, and comments.
-- **Carbon Credit Management**: Issue, transfer, and retire carbon credits with full audit trails.
-- **Real-time Monitoring**: Track the status of projects, verifications, and credits dynamically.
-- **Stakeholder Collaboration**: Connect developers, verifiers, standards bodies, and end users.
+## About
 
-## Technical Stack
+The Carbon Registry Platform provides a comprehensive solution for registering, verifying, and tracking carbon offset projects and credits. It helps combat climate change by supporting sustainable initiatives and monitoring their impact.
 
-- **Frontend**: React with TypeScript
-- **Backend**: Express.js API server
+### Key Features
+
+- **Project Management**: Register and monitor carbon offset projects with detailed tracking
+- **Verification System**: Multi-stage verification process with document management
+- **Carbon Credit Lifecycle**: Complete tracking of credit issuance, transfers, and retirements
+- **Blockchain Integration**: Immutable transaction recording for credit operations
+- **Paris Agreement Compliance**: Corresponding adjustment tracking for international transfers
+- **Interactive Maps**: Geospatial visualization of project locations and impacts
+- **Certificate System**: PDF generation with QR codes for verification
+- **External API**: Standardized endpoints for third-party integration
+- **Advanced Analytics**: Data visualization and reporting tools
+
+## Technology Stack
+
+- **Frontend**: React, TypeScript, TailwindCSS, shadcn UI components
+- **Backend**: Express.js, Node.js
 - **Database**: PostgreSQL with Drizzle ORM
-- **Authentication**: Passport.js with session-based auth
-- **Real-time Updates**: WebSocket for live data
-- **UI Components**: Shadcn UI + TailwindCSS
-- **State Management**: TanStack Query
-- **Routing**: Wouter
-
-## Carbon Credit Lifecycle
-
-The platform supports the full carbon credit lifecycle:
-
-1. **Issuance**: Credits are issued after project verification
-2. **Tracking**: Monitor available credits by project, vintage, and owner
-3. **Transfer**: Transfer credits between accounts with purpose documentation
-4. **Retirement**: Permanently retire credits with beneficiary and purpose recording
-5. **Reporting**: Transparent public tracking of all credit transactions
-
-## Verification System
-
-Our advanced verification system includes:
-
-- Multi-stage verification process with customizable requirements
-- Document upload and management for verification evidence
-- Internal and external comment systems for verifier feedback
-- Stage completion tracking with approval workflows
-- Third-party verifier integration
+- **Authentication**: Session-based with Passport.js
+- **Maps**: Mapbox integration
+- **PDF Generation**: PDFKit for certificate creation
+- **Data Visualization**: recharts, d3.js
+- **API Documentation**: Built-in interactive documentation
 
 ## Getting Started
 
-```bash
-# Install dependencies
-npm install
+### Prerequisites
 
-# Start the development server
-npm run dev
+- Node.js v20 or later
+- PostgreSQL database
+- Mapbox API key (optional for map features)
 
-# Create database schema (if using PostgreSQL)
-npm run db:push
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/carbon-registry.git
+   cd carbon-registry
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Set up environment variables:
+   Create a `.env` file in the root directory with:
+   ```
+   DATABASE_URL=postgresql://username:password@localhost:5432/carbon_registry
+   SESSION_SECRET=your_session_secret
+   MAPBOX_ACCESS_TOKEN=your_mapbox_token
+   ```
+
+4. Initialize the database:
+   ```bash
+   npm run db:push
+   ```
+
+5. Seed initial data (optional):
+   ```bash
+   npx tsx server/seed.ts
+   ```
+
+6. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+7. Open your browser to `http://localhost:5000`
+
+## Deployment
+
+For production deployment, see [DEPLOYMENT-CHECKLIST.md](./DEPLOYMENT-CHECKLIST.md).
+
+## Project Structure
+
+```
+carbon-registry/
+├── client/                 # Frontend React application
+│   ├── src/
+│   │   ├── components/     # Reusable UI components
+│   │   ├── hooks/          # Custom React hooks
+│   │   ├── lib/            # Utility functions
+│   │   ├── pages/          # Application pages
+│   │   └── types/          # TypeScript type definitions
+├── server/                 # Backend Express application
+│   ├── routes/             # API route definitions
+│   ├── utils/              # Server utility functions
+│   ├── db.ts               # Database connection
+│   └── index.ts            # Server entry point
+├── shared/                 # Shared code between client and server
+│   └── schema.ts           # Database schema definitions
+└── public/                 # Static assets
 ```
 
-## Environment Variables
+## Contributing
 
-- `DATABASE_URL`: PostgreSQL connection string
-- `MAPBOX_ACCESS_TOKEN`: Token for the map visualization features
-- `SESSION_SECRET`: Secret for securing user sessions
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-© 2023 Radical Zero GmbH - All Rights Reserved
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Built with [Replit](https://replit.com)
+- Maps powered by [Mapbox](https://mapbox.com)
+- UI components from [shadcn/ui](https://ui.shadcn.com/)

@@ -1,6 +1,85 @@
-node_modules
-dist
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Build outputs
+/dist/
+/build/
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
 .DS_Store
-server/public
-vite.config.ts.*
-*.tar.gz
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Cache and temporary files
+.cache/
+.temp/
+.tmp/
+.eslintcache
+.stylelintcache
+.npm/
+.sass-cache/
+
+# Testing
+/coverage/
+.nyc_output/
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Production deployment files
+.vercel
+.netlify
+.firebase/
+.next/
+out/
+
+# Generated files
+/public/generated/
+generated/
+
+# Replit specific
+.replit
+.nix/
+.replitdb
+replit.nix
+.replitignore
+.replit_auth
+
+# Misc
+/temp/
+/tmp/
+*/tmp/*
+.history/
