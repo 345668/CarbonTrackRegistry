@@ -18,6 +18,7 @@ Use this checklist to ensure a smooth deployment of the Carbon Registry applicat
 - [ ] **Build**: 
   - [ ] Application builds successfully with `npm run build`
   - [ ] All static assets are included in the build
+  - [ ] Static files are properly copied to the distribution folder with `./prepare-static-files.sh`
 
 ## Deployment Steps
 
@@ -75,10 +76,13 @@ Use this checklist to ensure a smooth deployment of the Carbon Registry applicat
 When deploying on Replit:
 
 1. Click the "Deploy" button in the Replit interface
-2. Ensure the build command is set to `npm run build`
+2. Ensure the build command is set to `npm run build && ./prepare-static-files.sh`
 3. Set the run command to `./start-production.sh`
 4. Configure secrets in the Replit secrets panel for all environment variables
 5. After deployment, verify the application is running correctly
+   - Check if the home page loads at the root URL
+   - Verify that the /auth route displays the login page
+   - Test that the API endpoints are accessible
 
 ## Troubleshooting Common Issues
 
@@ -96,5 +100,11 @@ When deploying on Replit:
   - Check server logs for detailed error messages
   - Verify all required environment variables are set
   - Ensure the build files are in the expected location
+  
+- **"Not Found" errors in production**:
+  - Check if static files exist in the `dist/public` directory
+  - Run `./prepare-static-files.sh` to copy static files from `server/public` to `dist/public`
+  - Verify that the server has access to the static files directory
+  - Check that the route handling is properly set up for client-side routes
 
 For any persistent issues, refer to the error logs and contact support at support@radicalzero.com.

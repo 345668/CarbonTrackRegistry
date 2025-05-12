@@ -25,17 +25,22 @@ The following environment variables must be set in your production environment:
    npm run build
    ```
 
-2. **Initialize the database**:
+2. **Prepare static files** (ensures client-side routing works properly):
+   ```bash
+   ./prepare-static-files.sh
+   ```
+
+3. **Initialize the database**:
    ```bash
    npm run db:push
    ```
 
-3. **Seed the database** (first time only):
+4. **Seed the database** (first time only):
    ```bash
    npx tsx server/seed.ts
    ```
 
-4. **Start the production server**:
+5. **Start the production server**:
    ```bash
    ./start-production.sh
    ```
@@ -71,5 +76,28 @@ If you encounter issues in production:
 2. Verify all environment variables are correctly set
 3. Ensure the database is accessible and properly configured
 4. Check server resources (CPU, memory, disk space)
+
+### Common Issues
+
+- **"Not Found" errors when accessing routes**:
+  ```bash
+  # Check if static files exist in the dist/public directory
+  ls -la dist/public/
+  
+  # If missing, run the prepare-static-files script
+  ./prepare-static-files.sh
+  
+  # Restart the application
+  ./start-production.sh
+  ```
+
+- **Database connection issues**:
+  ```bash
+  # Test database connection
+  npx tsx -e "import { pool } from './server/db.ts'; async function test() { try { await pool.query('SELECT NOW()'); console.log('Database connection successful'); } catch (e) { console.error('Database connection failed:', e); } } test();"
+  ```
+
+- **Memory store warnings**:
+  These warnings are expected in development but should be addressed in production by using a persistent session store like connect-pg-simple.
 
 For critical issues, contact the development team at contact@radicalzero.com
