@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Carbon Registry Platform</title>
+  <style>
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background-color: #0A192F;
+      color: #E2E8F0;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #5b67f8, #a4acff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .user-menu {
+      display: flex;
+      align-items: center;
+    }
+    .user-info {
+      margin-right: 1rem;
+    }
+    .btn {
+      display: inline-block;
+      background: linear-gradient(90deg, #5b67f8, #4353e0);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .btn:hover {
+      background: linear-gradient(90deg, #4353e0, #3342c8);
+    }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background-color: #0F213C;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(91, 103, 248, 0.2);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .card-title {
+      margin: 0;
+      color: #a4acff;
+      font-size: 1.25rem;
+    }
+    .card-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 1rem 0;
+    }
+    .sidebar {
+      position: fixed;
+      width: 250px;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      background-color: #0F213C;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 2rem 0;
+      z-index: 10;
+    }
+    .sidebar-header {
+      padding: 0 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .nav-links {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .nav-link {
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+    }
+    .nav-link.active {
+      background-color: rgba(91, 103, 248, 0.1);
+      border-left: 3px solid #5b67f8;
+    }
+    .nav-link a {
+      color: #E2E8F0;
+      text-decoration: none;
+    }
+    .nav-link-icon {
+      margin-right: 0.75rem;
+      width: 20px;
+      height: 20px;
+    }
+    .nav-link:hover {
+      background-color: rgba(91, 103, 248, 0.05);
+    }
+    .main-content {
+      margin-left: 250px;
+      padding: 2rem;
+    }
+    .section-header {
+      margin-bottom: 1.5rem;
+    }
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .table th, .table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    .table th {
+      background-color: rgba(91, 103, 248, 0.1);
+      color: #a4acff;
+      font-weight: 500;
+    }
+    .table tbody tr {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .table tbody tr:hover {
+      background-color: rgba(91, 103, 248, 0.05);
+    }
+    .status {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .status-pending {
+      background-color: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+    }
+    .status-active {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+    }
+    .status-completed {
+      background-color: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+    }
+    .status-verified {
+      background-color: rgba(139, 92, 246, 0.1);
+      color: #8b5cf6;
+    }
+    @media (max-width: 1024px) {
+      .sidebar {
+        display: none;
+      }
+      .main-content {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">Carbon Registry</div>
+    </div>
+    
+    <ul class="nav-links">
+      <li class="nav-link active">
+        <span class="nav-link-icon">📊</span>
+        <a href="/dashboard">Dashboard</a>
+      </li>
+      <li class="nav-link">
+        <span class="nav-link-icon">🌱</span>
+        <a href="/projects">Projects</a>
+      </li>
+      <li class="nav-link">
+        <span class="nav-link-icon">✅</span>
+        <a href="/verifications">Verifications</a>
+      </li>
+      <li class="nav-link">
+        <span class="nav-link-icon">💎</span>
+        <a href="/carbon-credits">Carbon Credits</a>
+      </li>
+      <li class="nav-link">
+        <span class="nav-link-icon">🔗</span>
+        <a href="/blockchain">Blockchain</a>
+      </li>
+      <li class="nav-link">
+        <span class="nav-link-icon">🌐</span>
+        <a href="/map">Map View</a>
+      </li>
+      <li class="nav-link">
+        <span class="nav-link-icon">📈</span>
+        <a href="/reports">Reports</a>
+      </li>
+      <li class="nav-link">
+        <span class="nav-link-icon">⚙️</span>
+        <a href="/settings">Settings</a>
+      </li>
+    </ul>
+  </div>
+  
+  <div class="main-content">
+    <header>
+      <h1>Dashboard</h1>
+      <div class="user-menu">
+        <div class="user-info">Welcome, <span id="username">User</span></div>
+        <button id="logout-btn" class="btn">Sign Out</button>
+      </div>
+    </header>
+    
+    <div class="dashboard-grid">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Total Projects</h3>
+        </div>
+        <div class="card-value">24</div>
+        <div class="card-footer">
+          <a href="/projects" class="btn">View All</a>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Carbon Credits Issued</h3>
+        </div>
+        <div class="card-value">128,450</div>
+        <div class="card-footer">
+          <a href="/carbon-credits" class="btn">View All</a>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Pending Verifications</h3>
+        </div>
+        <div class="card-value">7</div>
+        <div class="card-footer">
+          <a href="/verifications" class="btn">View All</a>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Credits Retired</h3>
+        </div>
+        <div class="card-value">42,280</div>
+        <div class="card-footer">
+          <a href="/carbon-credits?status=retired" class="btn">View All</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section-header">
+      <h2 class="section-title">Recent Projects</h2>
+    </div>
+    
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Project ID</th>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Location</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>PRJ-2025-001</td>
+          <td>Forest Conservation Initiative</td>
+          <td>Forestry</td>
+          <td>Brazil</td>
+          <td><span class="status status-active">Active</span></td>
+          <td><a href="/projects/PRJ-2025-001" class="btn">View</a></td>
+        </tr>
+        <tr>
+          <td>PRJ-2025-002</td>
+          <td>Solar Farm Development</td>
+          <td>Renewable Energy</td>
+          <td>India</td>
+          <td><span class="status status-verified">Verified</span></td>
+          <td><a href="/projects/PRJ-2025-002" class="btn">View</a></td>
+        </tr>
+        <tr>
+          <td>PRJ-2025-003</td>
+          <td>Coastal Mangrove Restoration</td>
+          <td>Conservation</td>
+          <td>Indonesia</td>
+          <td><span class="status status-pending">Pending</span></td>
+          <td><a href="/projects/PRJ-2025-003" class="btn">View</a></td>
+        </tr>
+        <tr>
+          <td>PRJ-2025-004</td>
+          <td>Wind Power Generation</td>
+          <td>Renewable Energy</td>
+          <td>Germany</td>
+          <td><span class="status status-active">Active</span></td>
+          <td><a href="/projects/PRJ-2025-004" class="btn">View</a></td>
+        </tr>
+        <tr>
+          <td>PRJ-2025-005</td>
+          <td>Agricultural Methane Reduction</td>
+          <td>Agriculture</td>
+          <td>United States</td>
+          <td><span class="status status-completed">Completed</span></td>
+          <td><a href="/projects/PRJ-2025-005" class="btn">View</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check authentication
+      fetch('/api/user')
+        .then(response => {
+          if (!response.ok) {
+            // If not authenticated, redirect to login
+            window.location.href = '/auth';
+            throw new Error('Not authenticated');
+          }
+          return response.json();
+        })
+        .then(user => {
+          // Update UI with user information
+          document.getElementById('username').textContent = user.username;
+        })
+        .catch(error => {
+          console.error('Authentication error:', error);
+        });
+      
+      // Logout functionality
+      document.getElementById('logout-btn').addEventListener('click', function() {
+        fetch('/api/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => {
+          if (response.ok) {
+            window.location.href = '/auth';
+          }
+        })
+        .catch(error => {
+          console.error('Logout error:', error);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

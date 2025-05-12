@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Carbon Registry Platform</title>
+  <style>
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background-color: #0A192F;
+      color: #E2E8F0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .auth-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      max-width: 1000px;
+      width: 90%;
+      min-height: 500px;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(91, 103, 248, 0.3);
+    }
+    .auth-form {
+      background-color: #0F213C;
+      padding: 2.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .hero {
+      background: linear-gradient(135deg, #0F213C 0%, #0A192F 100%);
+      padding: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 300%;
+      height: 300%;
+      top: -100%;
+      left: -100%;
+      background: radial-gradient(ellipse at center, rgba(91, 103, 248, 0.1) 0%, rgba(11, 27, 51, 0) 70%);
+      z-index: 0;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+    h1 { 
+      color: #5b67f8; 
+      margin-top: 0; 
+      font-size: 2rem;
+      background: linear-gradient(90deg, #5b67f8, #a4acff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    h2 {
+      color: white;
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+    }
+    p { line-height: 1.6; }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 0.375rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background-color: rgba(255, 255, 255, 0.05);
+      color: white;
+      font-size: 1rem;
+    }
+    input:focus {
+      outline: none;
+      border-color: #5b67f8;
+      box-shadow: 0 0 0 2px rgba(91, 103, 248, 0.2);
+    }
+    .btn {
+      display: inline-block;
+      background: linear-gradient(90deg, #5b67f8, #4353e0);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      width: 100%;
+    }
+    .btn:hover {
+      background: linear-gradient(90deg, #4353e0, #3342c8);
+    }
+    .tabs {
+      display: flex;
+      margin-bottom: 2rem;
+    }
+    .tab {
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-right: 1rem;
+    }
+    .tab.active {
+      border-bottom: 2px solid #5b67f8;
+      color: #a4acff;
+    }
+    .form-container {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+    .form {
+      display: none;
+    }
+    .form.active {
+      display: block;
+      flex-grow: 1;
+    }
+    .feature-list {
+      margin-top: 2rem;
+    }
+    .feature-item {
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: flex-start;
+    }
+    .feature-icon {
+      margin-right: 0.75rem;
+      color: #5b67f8;
+      font-size: 1.25rem;
+    }
+    .login-link, .register-link {
+      color: #5b67f8;
+      cursor: pointer;
+      margin-top: 1rem;
+      display: inline-block;
+    }
+    .error-message {
+      color: #f87171;
+      margin-top: 1rem;
+      display: none;
+    }
+    @media (max-width: 768px) {
+      .auth-container {
+        grid-template-columns: 1fr;
+      }
+      .hero {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-form">
+      <h2>Welcome to Carbon Registry</h2>
+      
+      <div class="tabs">
+        <div class="tab active" id="login-tab">Login</div>
+        <div class="tab" id="register-tab">Register</div>
+      </div>
+      
+      <div class="form-container">
+        <form id="login-form" class="form active" action="/api/login" method="POST">
+          <div class="form-group">
+            <label for="login-username">Username</label>
+            <input type="text" id="login-username" name="username" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" name="password" required>
+          </div>
+          
+          <button type="submit" class="btn">Login</button>
+          <div class="error-message" id="login-error"></div>
+        </form>
+        
+        <form id="register-form" class="form" action="/api/register" method="POST">
+          <div class="form-group">
+            <label for="register-username">Username</label>
+            <input type="text" id="register-username" name="username" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="register-email">Email</label>
+            <input type="email" id="register-email" name="email" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="register-password">Password</label>
+            <input type="password" id="register-password" name="password" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="register-role">Role</label>
+            <input type="text" id="register-role" name="role" value="user" readonly>
+          </div>
+          
+          <button type="submit" class="btn">Register</button>
+          <div class="error-message" id="register-error"></div>
+        </form>
+      </div>
+    </div>
+    
+    <div class="hero">
+      <div class="hero-content">
+        <h1>Carbon Registry Platform</h1>
+        <p>A comprehensive solution for carbon offset project management, verification, and credit tracking.</p>
+        
+        <div class="feature-list">
+          <div class="feature-item">
+            <span class="feature-icon">✓</span>
+            <span>Complete carbon credit lifecycle management</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">✓</span>
+            <span>Multi-stage verification process</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">✓</span>
+            <span>Blockchain integration for immutable records</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">✓</span>
+            <span>Paris Agreement compliance tracking</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">✓</span>
+            <span>Geospatial project visualization</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const loginTab = document.getElementById('login-tab');
+      const registerTab = document.getElementById('register-tab');
+      const loginForm = document.getElementById('login-form');
+      const registerForm = document.getElementById('register-form');
+      const loginError = document.getElementById('login-error');
+      const registerError = document.getElementById('register-error');
+      
+      // Tab switching
+      loginTab.addEventListener('click', function() {
+        loginTab.classList.add('active');
+        registerTab.classList.remove('active');
+        loginForm.classList.add('active');
+        registerForm.classList.remove('active');
+      });
+      
+      registerTab.addEventListener('click', function() {
+        registerTab.classList.add('active');
+        loginTab.classList.remove('active');
+        registerForm.classList.add('active');
+        loginForm.classList.remove('active');
+      });
+      
+      // Login form submission
+      loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('login-username').value;
+        const password = document.getElementById('login-password').value;
+        
+        fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password })
+        })
+        .then(response => {
+          if (response.ok) {
+            return response.json();
+          }
+          throw new Error('Login failed. Please check your credentials.');
+        })
+        .then(data => {
+          window.location.href = '/';
+        })
+        .catch(error => {
+          loginError.textContent = error.message;
+          loginError.style.display = 'block';
+        });
+      });
+      
+      // Register form submission
+      registerForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('register-username').value;
+        const email = document.getElementById('register-email').value;
+        const password = document.getElementById('register-password').value;
+        const role = document.getElementById('register-role').value;
+        
+        fetch('/api/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, email, password, role })
+        })
+        .then(response => {
+          if (response.ok) {
+            return response.json();
+          }
+          throw new Error('Registration failed. Username may already exist.');
+        })
+        .then(data => {
+          window.location.href = '/';
+        })
+        .catch(error => {
+          registerError.textContent = error.message;
+          registerError.style.display = 'block';
+        });
+      });
+    });
+  </script>
+</body>
+</html>
